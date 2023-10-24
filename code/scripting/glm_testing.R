@@ -12,6 +12,9 @@ data$desc$description
 
 cars <- data$data
 
+cars %>% filter(Region == "R11") %>% 
+  summarise(sum(ClaimNb))
+
 cars_split <- initial_split(cars, prop = 0.8)
 train <- training(cars_split)
 test <- testing(cars_split)
@@ -43,6 +46,11 @@ gas_count <- ggplot(cars, aes(x = Region)) +
   geom_bar() +
   labs(title = "Count of Cars by Region", x = "VehGas", y = "Count")
 
-grid_plot <- reg_count + area_count + brand_count + gas_count + 
-  plot_layout(nrow = 2, byrow = TRUE)
+grid_plot <- plot_layout(nrow = 2, byrow = TRUE) + 
+  reg_count + 
+  area_count + 
+  brand_count + 
+  gas_count 
+??plot_layout  
+
 
