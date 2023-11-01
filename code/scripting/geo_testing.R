@@ -18,3 +18,4 @@ test<- cross_join(reg_dict %>% select(region_name) %>% distinct,
 geo_loc %>% select(`Region Name`) %>% distinct()) %>% filter(region_name == `Region Name`)
 
 write_csv(cars_geo, "data/output/cars_geo.csv")
+getwd()
