@@ -3,10 +3,12 @@ output:
   pdf_document:
     fig_crop: no
 title: "Modelling Architectures Underlying Financial Pricing Problems"
-bibliography: references/fyp_references.bib
-nocite: '@*'
+
 editor_options: 
   chunk_output_type: inline
+  
+bibliography: references/fyp_references.bib
+nocite: '@*'  
 ---
 
 ```{r include=FALSE}
@@ -22,7 +24,7 @@ data <- OpenML::getOMLDataSet(data.id = 41214)
 cars <- data$data
 ```
 
-# Project Report
+## Project Report
 
 The field of insurance pricing has witnessed a significant evolution in modeling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
@@ -49,6 +51,9 @@ cars1<-cars %>%
 cor(cars1 %>% select(-IDpol)) %>% 
   heatmap(keep.dendro = TRUE)
 ```
+ 
+\newpage
+
 
 </center>
 
@@ -57,5 +62,8 @@ cor(cars1 %>% select(-IDpol)) %>%
 ![Number of Claims by Region](data/input/fig1.png)
 
 </center>
+
+
+## References
 
 <div id="refs"></div>
