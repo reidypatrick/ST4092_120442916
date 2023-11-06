@@ -1,17 +1,26 @@
 ---
+title: "Modelling Architectures Underlying Financial Pricing Problems"
+
+date: "`r Sys.Date()`"
+
 output: 
   pdf_document:
     fig_crop: no
-title: "Modelling Architectures Underlying Financial Pricing Problems"
+  author:
+  - name: "Patrick Reidy"
+    affiliation: "School of Mathematical Sciences, University College Cork"
+    email: "120442916@umail.ucc.ie"
 
 editor_options: 
   chunk_output_type: inline
   
 bibliography: references/fyp_references.bib
-nocite: '@*'  
+nocite: '@*'
 ---
 
-```{r include=FALSE}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
 library(CASdatasets)
 library(OpenML)
 library(farff)
@@ -21,39 +30,50 @@ library(ggplot2)
 
 data <- OpenML::getOMLDataSet(data.id = 41214)
 
-cars <- data$data
+cars_orig <- data$data
 ```
 
-## Project Report
+# Introduction
 
+### Regression
+
+Simple regression models are a statistical method to describe the relationship between two variables. They take the form $Y = \beta_0 + \beta_1X + \epsilon$. Y being the dependent or response variable, X being the independent or predictor variable, $\beta_0$ being the intercept, representing the value of the response when X = 0, $\beta_1$ is the coefficient that determines the slope and hence the relationship between X and Y. $\epsilon$ is the error term or noise, representing unexplained variability in the model.
+
+### GLMs
+
+With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[1], the technique of regression modelling was expanded to yield more robust and effective models. Defined as $g(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$ where p is the number of predictor variables incorporated into the model. $\mu$ is the response variable and $g: \mathbb{R} \to \mathbb{R}$ is the link function that relates the expected value of $\mu$ to the linear combination of the predictors. Similarly but more generally than for regression, $\beta_1,..., \beta_p$ are the coefficients that determine the slope depending on the values of $X_1,..., X_p$, which are the predictor variables. Here, $\beta_0$ represents again the intercept, or the value returned when $X_1,..., X_p$ are all equal to zero.
+
+```{=html}
+<!---
 The field of insurance pricing has witnessed a significant evolution in modeling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-Regression, as the earliest and simplest form of modeling, was a popular choice for insurance pricing due to its ease of interpretation and implementation. However, it struggled to handle the complexities of insurance data, which often include non-linear relationships and heterogeneous risk profiles. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and link functions. GLMs excelled in modeling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+Regression, as the earliest and simplest form of modeling, was a popular choice for insurance pricing due to its ease of interpretation and implementation. However, it struggled to handle the complexities of insurance data, which often include non-linear relationships. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excelled in modeling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
-Deep Learning models have recently taken the insurance industry by storm, ushering in a new era of predictive accuracy. These neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modeling, and prediction accuracy. They are capable of handling diverse data types, such as images, text, and tabular data, which is particularly valuable in the age of big data.
+Deep Learning models have recently taken the insurance industry by storm, ushering in a new era of predictive accuracy. These neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modeling, and predictive accuracy. They are capable of handling diverse data types, such as images, text, and tabular data, which is particularly valuable in the age of big data.
 
-However, the transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, DL models require substantial computational resources and large datasets for effective training, which may pose scalability issues for some insurance companies. Ensuring model fairness and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and compliance.
+However, the transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, DL models require substantial computational resources and large datasets for effective training, which may pose scalability issues for some insurance companies, especially if these methods are not implemented optimally. Ensuring model fairness and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
 $$
 \mu(y) = \beta_0 + \beta_1x_1 +... \Sigma_{i=1}^na_ix^i 
 $$
 
 In conclusion, the evolution from regression to Generalized Linear Models and finally to Deep Learning models in insurance pricing has been driven by the need for increased accuracy and the ability to model complex, non-linear relationships within diverse and large datasets. Each model paradigm has its unique strengths and limitations, making it important for insurers to carefully choose the most appropriate modeling technique for their specific needs and constraints. While Deep Learning holds great promise for the future of insurance pricing, it is essential to maintain a balance between predictive power and interpretability while addressing ethical concerns and data-related challenges.
-
+--->
+```
 <center>
 
-```{r echo=FALSE, fig.cap = "Correlation Heatmap of Features"}
-par(mfrow = c(1,1))
-cars1<-cars %>% 
-  mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>% 
-  mutate(VehGas = as.numeric(VehGas == "Diesel"))
+```{r Figure 1, echo=FALSE, fig.cap = "Correlation Heatmap of Features"}
+par(mfrow = c(1, 1))
+cars_numeric <- cars_orig %>%
+  mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
+  mutate(VehGas = as.numeric(VehGas == "Diesel")) %>%
+  select(-IDpol)
 
-cor(cars1 %>% select(-IDpol)) %>% 
-  heatmap(keep.dendro = TRUE)
+cor(cars_numeric) %>%
+  heatmap(keep.dendro = FALSE)
 ```
- 
-\newpage
 
+\newpage
 
 </center>
 
@@ -63,7 +83,9 @@ cor(cars1 %>% select(-IDpol)) %>%
 
 </center>
 
+\newpage
 
-## References
+# References
 
-<div id="refs"></div>
+::: {#refs}
+:::
