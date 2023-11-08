@@ -3,7 +3,7 @@ library(stringi)
 geo_loc <- read_csv("data/input/France_Regions_data.csv")
 
 geo_loc %>% select(`Region Name`) %>% distinct() %>% View()
-reg_dict <- read_csv("data/input/region_dict.csv", col_names = F) %>% 
+reg_dict <- read_csv("data/input/regions_FR.csv", col_names = F) %>% 
   mutate(code = paste0('R', X2),
          region_name = toupper(X1)) %>% 
   select(-X2, -X1) %>%  

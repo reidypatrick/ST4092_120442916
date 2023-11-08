@@ -53,4 +53,3 @@ grid_plot <- plot_layout(nrow = 2, byrow = TRUE) +
   gas_count 
 ??plot_layout  
 
-
