@@ -45,23 +45,29 @@ data <- OpenML::getOMLDataSet(data.id = 41214)
 cars_orig <- data$data
 ```
 
-\newpage
+# Abstract
+
+## Problem Statement
+
+## Indication of Methodology
+
+## Main Findings
+
+## Principal Conclusion
 
 # Introduction
 
 The field of insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-Regression, as the earliest and simplest form of modelling [1], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of insurance data, which often include non-linear relationships. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excelled in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+Linear regression, as the earliest and simplest form of modelling [1], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years. 
 
-Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. These neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised.
+Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised.*TODO: expand!*
 
-However, the transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance. Ensuring model fairness and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
+The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance*TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
-\newpage
+## Background
 
-# Background
-
-## Linear Regression
+### Linear Regression
 
 Simple regression models are a statistical method to describe the relationship between two variables. They are made up of two components: the Systematic component, and the random component. In the simplest case they take the form:
 
@@ -95,7 +101,10 @@ Where:
 
 -   $\beta_i, \ i = (1,...,p)$ are the coefficients that represent the relationship between $Y$ and the $X_i$ 's
 
-## GLMs
+
+*TODO: Expand on each of the above, Underlying assumptions, link between linear regression and GLM*
+
+### GLMs
 
 With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[2], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
 
@@ -115,9 +124,47 @@ Where:
 
 -   $\beta_0$ represents again the intercept, or the value returned when $X_1,..., X_p$ are all equal to zero
 
+```{=html}
+<!--# 
+o Establishing a territory
+  -> Claiming centrality
+  -> Making topic generalisations
+  -> Reviewing items of previous research
+  
+  "In the past decade much research has focused on..."
+
+o Establishing a niche
+  -> Counter-claiming
+  -> Indicating a gap
+  -> Question Raising
+  -> Continuing a tradition
+  
+  "It remains unclear why..."
+
+o Occupying the niche
+  -> Outlining purposes
+  -> Announcing principal findings
+  -> Indicating Structure
+  
+  "The purpose of this study was to..."
+-->
+```
+# Literature Review
+
 # Methodology
 
-## Data Investigation
+```{=html}
+<!--
+"The data used for this study were collected by..."
+-->
+```
+## Data Collection
+
+*TODO: Answer:*
+
+*What data set is being used, Discuss each plot in turn and insights yielded, Motivation behind each plot*
+
+## Data Analysis
 
 \newpage
 
@@ -129,8 +176,8 @@ dsn <- file.path(wd, "data/input/shapefile")
 
 shape <- shapefile(file.path(dsn, "FRA_adm1.shp"))
 
-claim_map <- create_map(cars, ClaimNb, shape)
-density_map <- create_map(cars, Density, shape)
+claim_map <- create_map(cars_orig, ClaimNb, shape)
+density_map <- create_map(cars_orig, Density, shape)
 
 grid.arrange(claim_map, density_map, ncol = 2)
 ```
@@ -152,9 +199,52 @@ cor(cars_numeric) %>%
   heatmap(keep.dendro = FALSE)
 ```
 
+</center>
+
 \newpage
 
-</center>
+## Modelling
+
+## Results
+
+# Discussion
+
+## Introduction
+
+```{=html}
+<!--
+o Review findings
+o Discuss outcomes
+o Stake a claim
+
+"The findings of this study clearly show that..."
+-->
+```
+## Evaluation
+
+```{=html}
+<!--
+o Analyse
+o Offer explanations
+o Reference the literature
+o State implications
+
+"One explanation for..."
+-->
+```
+## Conclusion
+
+```{=html}
+<!--
+o Limitations
+o Recommendations
+
+"This study was limited by..."
+-->
+```
+# Conclusion
+
+# Acknowledgements
 
 # References
 
