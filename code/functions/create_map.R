@@ -1,16 +1,13 @@
 create_map <- function(.data, .col, .shape){
   shape_copy <- .shape
   
+  #TODO: create separate function for summarising:
+  #      args: .data, group_by, fun(s), ...?
   # summarise desired column from cars data set
   cars_data <- .data %>% 
     group_by(Region) %>% 
     summarise(col = sum({{.col}})) %>% 
     mutate(Region = substr(Region, 2,3))
-  
-  # cars_data <- cars %>% 
-  #   group_by(Region) %>% 
-  #   summarise(col = sum(ClaimNb)) %>% 
-  #   mutate(Region = substr(Region, 2,3))
   
   # join onto .shape data
   map_obj <- shape_copy@data %>%
