@@ -18,19 +18,27 @@ editor_options:
   chunk_output_type: inline
   
 bibliography: references/fyp_references.bib
+csl: https://www.zotero.org/styles/ieee
 nocite: '@*'
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_chunk$set(fig.path = "data/figures/")
 
 library(CASdatasets)
 library(OpenML)
 library(farff)
 library(tidyverse)
 library(tidymodels)
+library(stringi)
+library(sf)
+library(raster)
 library(ggplot2)
+library(broom)
+library(gridExtra)
+
+
+source("code/functions/create_map.R")
 
 data <- OpenML::getOMLDataSet(data.id = 41214)
 
@@ -39,25 +47,23 @@ cars_orig <- data$data
 
 \newpage
 
-# Abstract
+# Introduction
 
-The field of insurance pricing has witnessed a significant evolution in modeling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
+The field of insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-Regression, as the earliest and simplest form of modeling [1], was a popular choice for insurance pricing due to its ease of interpretation and implementation. However, it struggled to handle the complexities of insurance data, which often include non-linear relationships. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excelled in modeling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+Regression, as the earliest and simplest form of modelling [1], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of insurance data, which often include non-linear relationships. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excelled in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
-Deep Learning models have recently taken the insurance industry by storm, ushering in a new era of predictive accuracy. These neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modeling, and predictive accuracy. They are capable of handling diverse data types, such as images, text, and tabular data, which is particularly valuable in the age of big data.
+Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. These neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised.
 
-However, the transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, DL models require substantial computational resources and large datasets for effective training, which may pose scalability issues for some insurance companies, especially if these methods are not implemented optimally. Ensuring model fairness and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
-
-In conclusion, the evolution from regression to Generalized Linear Models and finally to Deep Learning models in insurance pricing has been driven by the need for increased accuracy and the ability to model complex, non-linear relationships within diverse and large datasets. Each model paradigm has its unique strengths and limitations, making it important for insurers to carefully choose the most appropriate modeling technique for their specific needs and constraints. While Deep Learning holds great promise for the future of insurance pricing, it is essential to maintain a balance between predictive power and interpretability while addressing ethical concerns and data-related challenges.
+However, the transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance. Ensuring model fairness and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
 \newpage
 
-# Introduction
+# Background
 
 ## Linear Regression
 
-Simple regression models are a statistical method to describe the relationship between two variables. They take the form
+Simple regression models are a statistical method to describe the relationship between two variables. They are made up of two components: the Systematic component, and the random component. In the simplest case they take the form:
 
 $$Y = \beta_0 + \beta_1X + \epsilon$$
 
@@ -73,9 +79,25 @@ Where:
 
 -   $\epsilon$ is the error term or noise, representing unexplained variability in the model
 
+The random component here is the $\epsilon$ term, often assumed to be normally distributed, whereas the systematic component is the $\beta_0 + \beta_1X$
+
+This approach can be expanded to incorporate multiple predictor variables and as such takes the form
+
+$$Y = \beta_0 + (\Sigma_{i=1}^p \beta_iX_i) + \epsilon$$
+
+Where:
+
+-   $Y$, $\beta_0$, and $\epsilon$ are the same as before
+
+-   $p$ is the number of predictor variables
+
+-   $X_i, \ i =(1,...,p)$ are the multiple predictor variables
+
+-   $\beta_i, \ i = (1,...,p)$ are the coefficients that represent the relationship between $Y$ and the $X_i$ 's
+
 ## GLMs
 
-With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[2], the technique of regression modelling was expanded to yield more robust and effective models. These are defined as :
+With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[2], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
 
 $$g(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
 
@@ -93,14 +115,24 @@ Where:
 
 -   $\beta_0$ represents again the intercept, or the value returned when $X_1,..., X_p$ are all equal to zero
 
-# Data Preprocessing
+# Methodology
 
 ## Data Investigation
 
+\newpage
+
 <center>
 
-```{r Figure1, fig.cap="Number of Claims by Region", out.width = "100%", fig.align = "center"}
-knitr::include_graphics("data/figures/Figure2-1.png")
+```{r Figure1, fig.cap="Number of Claims by Region", out.width = "100%", fig.align = "center", fig.path = "data/figures/"}
+wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
+dsn <- file.path(wd, "data/input/shapefile")
+
+shape <- shapefile(file.path(dsn, "FRA_adm1.shp"))
+
+claim_map <- create_map(cars, ClaimNb, shape)
+density_map <- create_map(cars, Density, shape)
+
+grid.arrange(claim_map, density_map, ncol = 2)
 ```
 
 </center>
@@ -114,7 +146,7 @@ par(mfrow = c(1, 1))
 cars_numeric <- cars_orig %>%
   mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
   mutate(VehGas = as.numeric(VehGas == "Diesel")) %>%
-  select(-IDpol)
+  dplyr::select(-IDpol)
 
 cor(cars_numeric) %>%
   heatmap(keep.dendro = FALSE)
@@ -123,7 +155,6 @@ cor(cars_numeric) %>%
 \newpage
 
 </center>
-
 
 # References
 
