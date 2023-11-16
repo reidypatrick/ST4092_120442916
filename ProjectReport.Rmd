@@ -36,6 +36,8 @@ library(raster)
 library(ggplot2)
 library(broom)
 library(gridExtra)
+library(knitr)
+library(kableExtra)
 
 
 source("code/functions/create_map.R")
@@ -44,6 +46,8 @@ data <- OpenML::getOMLDataSet(data.id = 41214)
 
 cars_orig <- data$data
 ```
+
+\listoffigures
 
 # Abstract
 
@@ -59,7 +63,7 @@ cars_orig <- data$data
 
 The field of insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-Linear regression, as the earliest and simplest form of modelling [1], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years. 
+Linear regression, as the earliest and simplest form of modelling [@su_2012_linear], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
 Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised.*TODO: expand!*
 
@@ -101,12 +105,11 @@ Where:
 
 -   $\beta_i, \ i = (1,...,p)$ are the coefficients that represent the relationship between $Y$ and the $X_i$ 's
 
-
 *TODO: Expand on each of the above, Underlying assumptions, link between linear regression and GLM*
 
 ### GLMs
 
-With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[2], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
+With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[@nelder_1972_generalized], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
 
 $$g(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
 
@@ -162,7 +165,15 @@ o Occupying the niche
 
 *TODO: Answer:*
 
-*What data set is being used, Discuss each plot in turn and insights yielded, Motivation behind each plot*
+*What data set is being used, Discuss each plot in turn and insights yielded, Motivation behind each plot* This study is carried out using the French motor third partly liabilty claims frequency data (FreMTPL2freq) available through CASdatasets [@CASdatasets].
+
+```{r Table1, echo=FALSE, include=TRUE, paged.print=TRUE}
+
+head(cars_orig) %>% 
+kable(format = "latex", booktabs = TRUE, caption = "Head of the Cars Dataset", row.names = FALSE) %>%
+  kable_styling(latex_options = "scale_down") %>% 
+  kable_styling(latex_options = "HOLD_position")
+```
 
 ## Data Analysis
 
