@@ -21,3 +21,5 @@ factor(cars_geo$region_name, levels = sort(unique(cars_geo$region_name))) %>% un
 
 
 
+table1 <- head(cars_orig)
+col.names(table1)

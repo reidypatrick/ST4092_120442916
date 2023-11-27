@@ -12,7 +12,8 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: FALSE
+    keep_tex: TRUE
+    extra_dependencies: "subfig"
   author:
   - name: "Patrick Reidy"
     affiliation: "School of Mathematical Sciences, University College Cork"
@@ -47,6 +48,7 @@ library(broom)
 library(gridExtra)
 library(knitr)
 library(kableExtra)
+library(PerformanceAnalytics)
 
 
 source("code/functions/create_map.R")
@@ -55,6 +57,8 @@ data <- OpenML::getOMLDataSet(data.id = 41214)
 
 cars_orig <- data$data
 ```
+
+\newpage
 
 \listoffigures
 
@@ -116,6 +120,8 @@ Where:
 
 *TODO: Expand on each of the above, Underlying assumptions, link between linear regression and GLM*
 
+Underlying assumptions: normally distributed error, least squares estimate
+
 ### GLMs
 
 With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[@nelder_1972_generalized], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
@@ -172,15 +178,16 @@ o Occupying the niche
 ```
 ## Data Collection
 
-*TODO: Answer:*
-
 This study is carried out using the French motor third partly liability claims frequency data (FreMTPL2freq) available through CASdatasets [@CASdatasets].
 
-```{r Table1, echo=FALSE, include=TRUE, paged.print=TRUE}
-
-head(cars_orig) %>% 
-kable(format = "latex", booktabs = TRUE, caption = "Structure of the FreMTPL2freq Dataset", row.names = FALSE) %>%
-  kable_styling(latex_options = "scale_down") %>% 
+```{r tabHead, echo=FALSE, include=TRUE, paged.print=TRUE}
+head(cars_orig) %>%
+  kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Structure of the FreMTPL2freq Dataset",
+    row.names = FALSE
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
   kable_styling(latex_options = "HOLD_position")
 ```
 
@@ -190,11 +197,11 @@ The description of the data as outlined in the documentation is as follows:
 
 -   *IDpol: The policy ID (used to link with the claims dataset).*
 
--   *ClaimNb: Number of claims during the exposure period.*
+-   *ClaimNb: Number of claims during the exposure period.* This is the variable to be predicted
 
 -   *Exposure: The exposure period.*
 
--   *Area: The area code.*
+-   *Area: The area code.* Six distinct area codes from A to F.
 
 -   *VehPower: The power of the car (ordered categorical).*
 
@@ -208,36 +215,56 @@ The description of the data as outlined in the documentation is as follows:
 
 -   *VehGas: The car gas, Diesel or regular.*
 
--   *Density: The density of inhabitants (number of inhabitants per km2) in the city the driver of the car lives in.*
+-   *Density: The density of inhabitants (number of inhabitants per km2) in the city in which the driver of the car lives.*
 
 -   *Region: The policy regions in France (based on a standard French classification) "*
 
+```{r table_summary, echo=FALSE, include=TRUE, paged.print=TRUE}
+cars_orig %>% 
+  mutate(VehGas = as.factor(VehGas)) %>% 
+  dplyr::select(-IDpol, -where(is.factor)) %>% 
+  summary() %>% 
+  knitr::kable() %>%
+  kable_styling(latex_options = "scale_down") %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+
 ## Data Analysis
-*Discuss each plot in turn and insights yielded, Motivation behind each plot*
 
-\newpage
+```{r setup_fig, echo=FALSE}
 
-<center>
-
-```{r Figure1, fig.cap="Number of Claims by Region", out.width = "100%", fig.align = "center", fig.path = "data/figures/"}
 wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
 dsn <- file.path(wd, "data/input/shapefile")
 
-shape <- shapefile(file.path(dsn, "FRA_adm1.shp"))
+shape <- shapefile(file.path(dsn, "FRA_adm1.shp")) 
 
-claim_map <- create_map(cars_orig, ClaimNb, shape)
-density_map <- create_map(cars_orig, Density, shape)
-
-grid.arrange(claim_map, density_map, ncol = 2)
 ```
 
-</center>
+Before investigating the performance of the models, we carry out a number of investigations regarding the structure and behaviour of the data. This is important in identifying which methods to use, issues to address and results to expect.
+
+*Should first step be investigating e.g. cor matrix, i.e. dataset as a whole?*
+
+As ClaimNb is the response variable it is no doubt the most important variable to understand and the first variable we investigate. Figure \@ref(fig:fig_cor)
+
+*Discuss each plot in turn and insights yielded, Motivation behind each plot*
+
+*Histogram of every factor vs ClaimNb - Area, Vehpower, VehAge, VehBrand, VehGas, Region* *Scatterplot of every numeric vs ClaimNb - Exposure, DrivAge, Density* *Map of every variable*
+
+See Figure \@ref(fig:figHist-1)
+
+See Figure \@ref(fig:figHist-2)
+
+See Figure \@ref(fig:figHist-3)
+
+See Figure \@ref(fig:figHist-4)
 
 \newpage
 
 <center>
 
-```{r Figure2, echo=FALSE, fig.cap = "Correlation Heatmap of Features", fig.path = "data/figures/"}
+<center>
+
+```{r figCor, echo=FALSE, fig.cap = "Correlation Heatmap of Features", fig.path = "data/figures/"}
 par(mfrow = c(1, 1))
 cars_numeric <- cars_orig %>%
   mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
@@ -248,7 +275,61 @@ cor(cars_numeric) %>%
   heatmap(keep.dendro = FALSE)
 ```
 
+\newpage
+
 </center>
+
+```{r figBox, echo = FALSE, include = TRUE, fig.path = "data/figures/", fig.cap = "Boxplots of Numerical Variables", fig.subcap = c("ClaimNb", "VehPower", "VehAge", "DrivAge", "Exposure"), out.width="20%", fig.ncol=5}
+
+# 
+# ggplot(cars_orig, aes(x = ClaimNb)) +
+#   geom_boxplot(fill = "blue", color = "black", notch = TRUE, notch_width = 0.2) +
+#   coord_flip()
+# 
+# ggplot(cars_orig, aes(x = VehPower)) +
+#   geom_boxplot(fill = "green", color = "black", notch = TRUE, notchwidth = 0.2) +
+#   coord_flip()
+# 
+# ggplot(cars_orig, aes(x = VehAge)) +
+#   geom_boxplot(fill = "red", color = "black") +
+#   stat_boxplot(geom='errorbar', width = 0.2) +
+#   coord_flip()
+# 
+# ggplot(cars_orig, aes(x = DrivAge)) +
+#   geom_boxplot(fill = "orange", color = "black") +
+#   stat_boxplot(geom='errorbar') +
+#   coord_flip()
+# 
+# ggplot(cars_orig, aes(x = Exposure)) +
+#   geom_boxplot(fill = "purple", color = "black") +
+#   stat_boxplot(geom='errorbar') +
+#   coord_flip()
+
+boxplot(cars_orig$ClaimNb, col = "blue")
+boxplot(cars_orig$VehPower, col = "green")
+boxplot(cars_orig$VehAge, col = "red")
+boxplot(cars_orig$DrivAge, col = "orange")
+boxplot(cars_orig$Exposure, col = "purple")
+
+```
+
+```{r figHist, echo = FALSE, include = TRUE, fig.path = "data/figures/", fig.cap = "Histograms of Numerical Variables", fig.subcap = c("ClaimNb", "VehPower", "VehAge", "DrivAge", "Exposure"), out.width="20%", fig.ncol=5, out.height="100%"}
+
+ggplot(cars_orig, aes(x = ClaimNb)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") 
+
+ggplot(cars_orig, aes(x = VehPower)) +
+  geom_histogram(binwidth = 1, fill = "green", color = "black") 
+
+ggplot(cars_orig, aes(x = VehAge)) +
+  geom_histogram(binwidth = 1, fill = "red", color = "black") 
+
+ggplot(cars_orig, aes(x = DrivAge)) +
+  geom_histogram(binwidth = 1, fill = "orange", color = "black")
+
+ggplot(cars_orig, aes(x = Exposure)) +
+  geom_histogram(binwidth = 1/12, fill = "purple", color = "black")
+```
 
 \newpage
 

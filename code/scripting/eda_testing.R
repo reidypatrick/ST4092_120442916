@@ -82,3 +82,12 @@ cor(cars1 %>% select(-IDpol)) %>% heatmap(keep.dendro = TRUE)
 
 ggplot(data = melt(cars), aes(x=ClaimNb, y=VehPower, fill=value)) + 
   geom_tile()
+
+cars_orig %>% 
+  as_tibble() %>% 
+  dplyr::select(where(is.numeric), -IDpol) %>% 
+  pairs()
+
+cars_orig %>% dplyr::select(Region, Area, Density) %>% unique %>% arrange(Region, Area)
+
+plot(cars_cumsum$Exposure, cars_cumsum$accum)

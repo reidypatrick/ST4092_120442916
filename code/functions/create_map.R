@@ -1,4 +1,7 @@
-create_map <- function(.data, .col, .shape) {
+create_map <- function(.data = cars_orig, .col, .shape = shape) {
+  # Defaults to using cars_orig and france shapefile
+  # also defaults to summarising by the sum of specified column
+  
   shape_copy <- .shape
   
   # TODO: create separate function for summarising:
