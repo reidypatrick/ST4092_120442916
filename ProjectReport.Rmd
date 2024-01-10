@@ -219,7 +219,7 @@ The description of the data as outlined in the documentation is as follows:
 
 -   *Region: The policy regions in France (based on a standard French classification) "*
 
-```{r table_summary, echo=FALSE, include=TRUE, paged.print=TRUE}
+```{r tableSum, echo=FALSE, include=TRUE, paged.print=TRUE}
 cars_orig %>% 
   mutate(VehGas = as.factor(VehGas)) %>% 
   dplyr::select(-IDpol, -where(is.factor)) %>% 
