@@ -406,7 +406,11 @@ cat(
   )
 ```
 
-Where: • “ClaimNb \~ .”: is the formula, signifying ClaimNb as the response variable and including all other variables as predictors. • “train” is the training set • “family” is defined as poisson using log as the link function.
+-   Where: “ClaimNb \~ .”: is the formula, signifying ClaimNb as the response variable and including all other variables as predictors
+
+-   “train” is the training set
+
+-   “family” is defined as poisson using log as the link function
 
 Alternatively for more robust feature selection one can use backwards elimination
 
@@ -460,7 +464,7 @@ cat(
 
 ```
 
-This is the familiar output of a the summary of a GLM, with the intercept, standard error and significance level of each predictor outlined. It can be seen the categorical predictors have been split into dummy variables in the cases of Region, VehBrand, and Area. Metrics for the model as a whole can be seen underneath, alternatively we can evaluate performance with other metrics as seen below:
+This is the familiar output of a the summary of a GLM, with the intercept, standard error and significance level of each predictor outlined. It can be seen that the categorical predictors have been split into dummy variables in the cases of Region, VehBrand, and Area. Metrics such as Deviance and AIC for the model as a whole can be seen underneath, alternatively we can evaluate performance with other metrics as seen below:
 
 ```{r glmMetrics, echo = FALSE, include=TRUE}
 predictions <- predict(glm1, newdata = test, type = "response") %>% 

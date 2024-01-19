@@ -188,7 +188,8 @@ head(cars_orig) %>%
     row.names = FALSE
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
-  kable_styling(latex_options = "HOLD_position")
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped")
 ```
 
 The description of the data as outlined in the documentation is as follows:
@@ -224,9 +225,11 @@ cars_orig %>%
   mutate(VehGas = as.factor(VehGas)) %>% 
   dplyr::select(-IDpol, -where(is.factor)) %>% 
   summary() %>% 
-  knitr::kable() %>%
+  knitr::kable(format = "latex", booktabs = TRUE,
+               caption = "Summary of Variables in Data") %>%
   kable_styling(latex_options = "scale_down") %>%
-  kable_styling(latex_options = "HOLD_position")
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped")
 ```
 
 ## Data Analysis
@@ -334,6 +337,168 @@ ggplot(cars_orig, aes(x = Exposure)) +
 \newpage
 
 ## Modelling
+
+### GLMs
+
+```{r glmSetup, include=TRUE, echo = FALSE}
+# Get dataframe
+cars_glm <- cars_orig %>% 
+  dplyr::select(-IDpol) %>% 
+  dplyr::select(where(is.factor), everything())
+
+# Split data
+cars_split <- initial_split(cars_glm, prop = 0.8)
+train <- training(cars_split)
+test <- testing(cars_split)
+```
+
+Using the basic stats \@[@stats-3] implementation of GLMs, one can fit a model with the following:
+
+```{r glmFit, include  = TRUE, echo=TRUE}
+glm1 <- glm(ClaimNb ~ ., data = train, family = poisson(link=log), offset = Exposure)
+```
+
+Yielding:
+
+```{r glmSummaryCoef, include = TRUE, echo = FALSE}
+glmSum <- summary(glm1)
+
+glmSum$coefficients %>% 
+  as_tibble() %>% 
+  mutate(
+    " " = rownames(glmSum$coefficients),
+    Significance = case_when(
+    `Pr(>|z|)` == 0 ~ "***",
+    `Pr(>|z|)` < 0.001 ~ "**",
+    `Pr(>|z|)` < 0.01 ~ "*",
+    `Pr(>|z|)` < 0.05 ~ ".",
+    .default = " "    
+  )) %>% 
+  relocate(" ", .before = everything()) %>% 
+  kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Coefficients of fitted GLM",
+    row.names = TRUE
+  ) %>%
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped") %>% 
+  pack_rows(
+    index = c(
+      " " = 1,
+      "Area" = 5, 
+      "VehBrand" = 10, 
+      "Region" = 21, 
+      "Numeric" = 7
+    )
+  )
+
+
+```
+
+```{r glmSumDetails, include = TRUE, echo = FALSE}
+
+cat(
+  "     Null Deviance:", glmSum$null.deviance,  "on", glmSum$df.null, "degrees of freedom\n",
+  "Residual Deviance:", glmSum$deviance, "on", glmSum$df.residual, "degrees of freedom\n",
+  "AIC:", glmSum$aic,
+  "\n\n",
+  "Number of Fisher Scoring iterations", glmSum$iter
+  )
+```
+
+-   Where: “ClaimNb \~ .”: is the formula, signifying ClaimNb as the response variable and including all other variables as predictors
+
+-   “train” is the training set
+
+-   “family” is defined as poisson using log as the link function
+
+Alternatively for more robust feature selection one can use backwards elimination
+
+```{r glmBackElim, include = TRUE, echo = TRUE}
+backward_elimination <- stats::step(glm1, direction = "backward", trace = 0)
+```
+
+```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
+glmBackElimSum <- summary(backward_elimination)
+
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+glmBackElimSum$coefficients %>% 
+  as_tibble() %>% 
+  mutate(
+    " " = rownames(glmBackElimSum$coefficients),
+    Significance = case_when(
+    `Pr(>|z|)` == 0 ~ "***",
+    `Pr(>|z|)` < 0.001 ~ "**",
+    `Pr(>|z|)` < 0.01 ~ "*",
+    `Pr(>|z|)` < 0.05 ~ ".",
+    .default = " "    
+  )) %>% 
+  relocate(" ", .before = everything()) %>% 
+  kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Coefficients of GLM with backwards elimination",
+    row.names = TRUE
+  ) %>%
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped") %>% 
+  pack_rows(
+    index = c(
+      " " = 1,
+      "Area" = 5, 
+      "VehBrand" = 10, 
+      "Region" = 21, 
+      "Numeric" = 6
+    )
+  )
+```
+
+```{r glmBackElimSumDetails, echo = FALSE, include = TRUE}
+cat(
+  "     Null Deviance:", glmBackElimSum$null.deviance,  "on", glmBackElimSum$df.null, "degrees of freedom\n",
+  "Residual Deviance:", glmBackElimSum$deviance, "on", glmBackElimSum$df.residual, "degrees of freedom\n",
+  "AIC:", glmBackElimSum$aic,
+  "\n\n",
+  "Number of Fisher Scoring iterations", glmBackElimSum$iter
+  )
+
+```
+
+This is the familiar output of a the summary of a GLM, with the intercept, standard error and significance level of each predictor outlined. It can be seen that the categorical predictors have been split into dummy variables in the cases of Region, VehBrand, and Area. Metrics such as Deviance and AIC for the model as a whole can be seen underneath, alternatively we can evaluate performance with other metrics as seen below:
+
+```{r glmMetrics, echo = FALSE, include=TRUE}
+predictions <- predict(glm1, newdata = test, type = "response") %>% 
+  as_tibble() %>% 
+  mutate(index = seq(nrow(test)))
+
+
+val_data <- test %>% 
+  mutate(index = seq(nrow(test))) %>% 
+  left_join(predictions, join_by(index))
+
+yardstick::metrics(data = val_data, truth = ClaimNb, estimate = value) %>% 
+  knitr::kable(format = "latex", booktabs = TRUE,
+    caption = "Metrics of GLM Predictions on Validation Data") %>% 
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped") 
+
+```
+
+We can also look at a selection of predictions made from the resulting model:
+
+```{r glmPredictions, include = TRUE, echo = FALSE, out.width = "100%", paged.print = TRUE}
+
+head(val_data) %>% 
+  dplyr::select(-index) %>% 
+  relocate(ClaimNb, .before = value) %>% 
+  mutate(Prediction = exp(value)) %>% 
+  kable(format = "latex", booktabs = TRUE,
+    caption = "Predictions from GLM on testing data") %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+  kable_styling(latex_options = "striped") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
+  column_spec(11:12, color = "gray", bold  = TRUE) 
+```
 
 ## Results
 
