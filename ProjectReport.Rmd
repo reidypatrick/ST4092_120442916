@@ -51,7 +51,8 @@ library(kableExtra)
 library(PerformanceAnalytics)
 
 
-source("code/functions/create_map.R")
+source("code/functions/source_functions.R")
+source_functions()
 
 data <- OpenML::getOMLDataSet(data.id = 41214)
 

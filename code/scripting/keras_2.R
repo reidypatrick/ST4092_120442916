@@ -65,5 +65,5 @@ fit_and_evaluate(loss = "Poisson", final_activation = k_exp)
 fit_and_evaluate(loss = "MSE", final_activation = "linear")
 #>     loss      mse  poisson 
 #> 1.021652 1.021652 1.031347
-
+predict(model, test_data %>% as.matrix())
 
