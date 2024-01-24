@@ -91,3 +91,7 @@ cars_orig %>%
 cars_orig %>% dplyr::select(Region, Area, Density) %>% unique %>% arrange(Region, Area)
 
 plot(cars_cumsum$Exposure, cars_cumsum$accum)
+
+
+
+pairs(cars_orig %>% dplyr::select(where(is.numeric)))

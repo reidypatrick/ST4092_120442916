@@ -1,9 +1,9 @@
 create_map <- function(.data = cars_orig, .col, .shape = shape) {
   # Defaults to using cars_orig and france shapefile
   # also defaults to summarising by the sum of specified column
-  
+
   shape_copy <- .shape
-  
+
   # TODO: create separate function for summarising:
   #      args: .data, group_by, fun(s), ...?
   # summarise desired column from cars data set
@@ -20,9 +20,10 @@ create_map <- function(.data = cars_orig, .col, .shape = shape) {
 
   # plot according to desired column
   ggplot() +
-    geom_sf(map_obj, 
-            mapping = aes(fill = col, geometry = geometry), 
-            colour = "white") +
-    scale_fill_gradient(name = substitute(.col), labels = comma) +
+    geom_sf(map_obj,
+      mapping = aes(fill = col, geometry = geometry),
+      colour = "white"
+    ) +
+    scale_fill_gradient(name = substitute(.col), labels = "comma") +
     theme_void()
 }

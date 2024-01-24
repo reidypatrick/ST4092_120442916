@@ -24,6 +24,8 @@ tune_keras_dropout <- function(recipe, n_neurons, .dropout, n_epochs){
     set_engine('keras') %>%
     set_mode('regression')
   
+  nn_model_dropout$engine$set_params(loss = "poisson", optimizer = optimizer_adam())
+  
   ### Define Workflow ----------------------------------------------------------
   workflow_dropout <- workflow() %>%
     add_recipe(recipe) %>%
