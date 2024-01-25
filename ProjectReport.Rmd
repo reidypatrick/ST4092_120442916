@@ -12,7 +12,7 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: TRUE
+    keep_tex: FALSE
     extra_dependencies: "subfig"
   author:
   - name: "Patrick Reidy"
