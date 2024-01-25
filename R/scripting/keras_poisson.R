@@ -9,8 +9,8 @@ library(keras)
 library(scales)
 library(healthyR.ai)
 library(deepviz)
-source("~/ST4092_120442916/code/functions/source_functions.R")
-source_functions("code/functions")
+source("~/ST4092_120442916/R/functions/source_functions.R")
+source_functions()
 
 # Collect Data -----------------------------------------------------------------
 data <- OpenML::getOMLDataSet(data.id = 41214)
@@ -101,12 +101,12 @@ par(mfrow = c(1,2))
 hist(Predictions, freq = FALSE)
 hist(data$data$ClaimNb, freq = FALSE)
 
-plot_model(model1)
-reticulate::source_python("code/scripting/py_plot_model.py")
-plot_model(model1)
-rm(plot_model)
-
-plot_model(model1)
+# plot_model(model1)
+# reticulate::source_python("code/scripting/py_plot_model.py")
+# plot_model(model1)
+# rm(plot_model)
+# 
+# plot_model(model1)
 
 # Tune:
 #   Number of hidden layers
