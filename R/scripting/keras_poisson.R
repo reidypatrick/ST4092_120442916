@@ -65,6 +65,7 @@ model1 <- keras_model_sequential()
 model1 %>% 
   layer_dense(units = 64, activation = "relu", input_shape = ncol(train_data)-1) %>% 
   layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 32, activation = "relu") %>%
   layer_dense(units = 1, activation = "exponential") 
 
 model1 %>% compile(
