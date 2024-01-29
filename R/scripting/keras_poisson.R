@@ -1,20 +1,17 @@
-library(CASdatasets)
 library(OpenML)
-library(farff)
 library(tidyverse)
 library(tidymodels)
-library(parsnip)
-library(caret)
 library(keras)
-library(scales)
-library(healthyR.ai)
-library(deepviz)
+
 source("~/ST4092_120442916/R/functions/source_functions.R")
 source_functions()
 
 # Collect Data -----------------------------------------------------------------
+log_info("Download OpenML dataset")
 data <- OpenML::getOMLDataSet(data.id = 41214)
 
+# Preprocess the data ---------------------------------------------------------
+log_info("Preprocess data")
 df.n <- data$data %>% 
   dplyr::select(where(is.numeric)) %>% 
   mutate(across(c(where(is.numeric), -IDpol, -ClaimNb), ~ scale_col(.)))
@@ -26,25 +23,16 @@ df <- data$data %>%
   left_join(df.n, join_by(IDpol)) %>% 
   dplyr::select(-IDpol)
 
-summary(df)
-
-## Initialise control variables ------------------------------------------------
-n_boots <- 5
-n_epochs <- c(50)
-n_neurons <- c(16, 32, 64)
-t_dropout <- c(0.2, 0.3, 0.4)
-
-# Model Building ---------------------------------------------------------------
 ## Create Recipe ---------------------------------------------------------------
 recipe <- recipe(ClaimNb ~ ., data = df) %>%
   step_dummy(all_factor())
 
-
-## Preprocess the data ---------------------------------------------------------
+## Bake Data -------------------------------------------------------------------
 preprocessed_data <- prep(recipe, training = df, retain = TRUE)
 baked_data <- bake(preprocessed_data, new_data = NULL)
 
 ## Split Data ------------------------------------------------------------------
+log_info("Test/train split")
 indices <- sample(1:nrow(df), 0.8 * nrow(df))
 train_data <- baked_data[indices, ] 
 test_data <- baked_data[-indices, ] 
@@ -57,61 +45,57 @@ y_test <- test_data$ClaimNb
 
 
 # Fit Model --------------------------------------------------------------------
-# Clear unused memory
+# Clear unused memory ----------------------------------------------------------
+log_info("Optimising memory usage")
 gc()
 
-# Construct model
-model1 <- keras_model_sequential()
-model1 %>% 
-  layer_dense(units = 64, activation = "relu", input_shape = ncol(train_data)-1) %>% 
-  layer_dense(units = 32, activation = "relu") %>%
-  layer_dense(units = 1, activation = "exponential") 
+## Initialise control variables ------------------------------------------------
+t_batchsize <- c(512,1024)
+t_epochs <- c(30,50)
+t_act_final <- c("softplus", "exponential")
+t_lr <- c(0.01,0.001)
 
-model1 %>% compile(
-  loss = "poisson",
-  optimizer = optimizer_adam(learning_rate = 0.001),
-  metrics = c("mean_squared_error")
-)
+t_hidden_nodes <- c(16,32)
+t_hidden_act <- c("relu", "tanh")
 
-history <- model1 %>%
-  keras::fit(
-    x = x_train %>% as.matrix(),
-    y = y_train %>% as.matrix(),
-    epochs = 30,
-    batch_size = 256,
-    validation_split = 0.2
-  )
+tune_grid = expand.grid(
+  batchsize = t_batchsize, 
+  epochs = t_epochs, 
+  final_act  = t_act_final, 
+  learn_rate = t_lr,
+  t_hidden_act1 = t_hidden_act, t_hidden_nodes1 = t_hidden_nodes,
+  t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes)
 
-Predictions <- model1 %>% 
-  predict(x_test)
+# Fit model
+log_info("Start Model Training")
+poisson_fit <- fit_keras_poisson(x_train, y_train, lr = 0.001,
+                                 batchsize = 256, nodes = c(32,32),
+                                 n_epochs = 50)
+log_info("Done")
 
-head(Predictions)
-summary(Predictions)
+model_list <- list()
 
-val_data_model1 <- test_data %>% 
-  cbind(Predictions) %>% 
-  relocate(ClaimNb, .before = Predictions)
+for (i in seq_len(nrow(tune_grid))) {
+poisson_fit <- fit_keras_poisson(
+  x_train,
+  y_train,
+  nodes = c(tune_grid$t_hidden_nodes1[i], tune_grid$t_hidden_nodes2[i]),
+  batchsize = tune_grid$batchsize[i],
+  n_epochs = tune_grid$epochs[i],
+  act_funs = c(tune_grid$t_hidden_act1[i], 
+               tune_grid$t_hidden_act2[i], 
+               tune_grid$final_act[i]),
+  lr = tune_grid$learn_rate[i])
 
-head(val_data_model1)
+  model_list[[i]] <- poisson_fit
+}
 
-plot(val_data_model1$ClaimNb, val_data_model1$Predictions)
-
-par(mfrow = c(1,2))
-hist(Predictions, freq = FALSE)
-hist(data$data$ClaimNb, freq = FALSE)
-
-# plot_model(model1)
-# reticulate::source_python("code/scripting/py_plot_model.py")
-# plot_model(model1)
-# rm(plot_model)
-# 
-# plot_model(model1)
+Sys.time()
 
 # Tune:
-#   Number of hidden layers
+#   Batchsize
+#   Epochs
 #   Nodes per layer
 #   Activation functions per layer
 #   Exponential vs. Softplus
-#   Batchsize
-
-
+#   Number of hidden layers
