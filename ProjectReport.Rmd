@@ -35,23 +35,16 @@ csl: https://www.zotero.org/styles/ieee
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
-library(CASdatasets)
 library(OpenML)
-library(farff)
 library(tidyverse)
 library(tidymodels)
-library(stringi)
-library(sf)
 library(raster)
 library(ggplot2)
-library(broom)
 library(gridExtra)
 library(knitr)
 library(kableExtra)
-library(PerformanceAnalytics)
 
-
-source("code/functions/source_functions.R")
+source("R/functions/source_functions.R")
 source_functions()
 
 data <- OpenML::getOMLDataSet(data.id = 41214)
@@ -62,6 +55,8 @@ cars_orig <- data$data
 \newpage
 
 \listoffigures
+
+\listoftables
 
 # Abstract
 
