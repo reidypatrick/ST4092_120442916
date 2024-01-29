@@ -150,3 +150,22 @@ val_data_model1 <- test_data %>%
 par(mfrow = c(1,2))
 hist(Predictions, freq = FALSE)
 hist(data$data$ClaimNb, freq = FALSE)
+
+# libraries
+library(ggraph)
+library(igraph)
+library(tidyverse)
+
+# create an edge list data frame giving the hierarchical structure of your individuals
+d1 <- data.frame(from="origin", to=paste("group", seq(1,5), sep=""))
+d2 <- data.frame(from=rep(d1$to, each=5), to=paste("subgroup", seq(1,25), sep="_"))
+edges <- rbind(d1, d2)
+
+# Create a graph object 
+mygraph <- graph_from_data_frame( edges )
+
+# Basic tree
+ggraph(mygraph, layout = 'dendrogram', circular = FALSE) + 
+  geom_edge_diagonal() +
+  geom_node_point() +
+  theme_void()
