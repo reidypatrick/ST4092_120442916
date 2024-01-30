@@ -49,7 +49,7 @@ y_test <- test_data$ClaimNb
 log_info("Optimising memory usage")
 gc()
 
-## Initialise control variables ------------------------------------------------
+## Implement tuning grid -------------------------------------------------------
 t_batchsize <- c(512,1024)
 t_epochs <- c(30,50)
 t_act_final <- c("softplus", "exponential")
@@ -66,36 +66,70 @@ tune_grid = expand.grid(
   t_hidden_act1 = t_hidden_act, t_hidden_nodes1 = t_hidden_nodes,
   t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes)
 
-# Fit model
-log_info("Start Model Training")
-poisson_fit <- fit_keras_poisson(x_train, y_train, lr = 0.001,
-                                 batchsize = 256, nodes = c(32,32),
-                                 n_epochs = 50)
-log_info("Done")
-
+# Fit model --------------------------------------------------------------------
+## Test model with tune grid ---------------------------------------------------
 model_list <- list()
 
-for (i in seq_len(nrow(tune_grid))) {
-poisson_fit <- fit_keras_poisson(
-  x_train,
-  y_train,
-  nodes = c(tune_grid$t_hidden_nodes1[i], tune_grid$t_hidden_nodes2[i]),
-  batchsize = tune_grid$batchsize[i],
-  n_epochs = tune_grid$epochs[i],
-  act_funs = c(tune_grid$t_hidden_act1[i], 
-               tune_grid$t_hidden_act2[i], 
-               tune_grid$final_act[i]),
-  lr = tune_grid$learn_rate[i])
-
-  model_list[[i]] <- poisson_fit
+for (i in (length(model_list)+1):nrow(tune_grid)) {
+  log_info("Start Loop")
+  gc()
+  log_info(paste("Model Number:", i))
+  poisson_fit <- fit_keras_poisson(
+    x_train,
+    y_train,
+    nodes = c(tune_grid$t_hidden_nodes1[i], tune_grid$t_hidden_nodes2[i]),
+    batchsize = tune_grid$batchsize[i],
+    n_epochs = tune_grid$epochs[i],
+    act_funs = c(tune_grid$t_hidden_act1[i], 
+                 tune_grid$t_hidden_act2[i], 
+                 tune_grid$final_act[i]),
+    lr = tune_grid$learn_rate[i])
+  
+    model_list[[i]] <- poisson_fit
+  saveRDS(model_list, "model_list.rds")
+  log_info("Finish Loop")  
 }
 
-Sys.time()
+save.image("Tune.Rdata")
+
+model_list <- readRDS("model_list.rds")
+
+model_list
+
+metrics_df <- data.frame(
+  matrix(rep(numeric(256), 5), ncol = 5,
+  dimnames = list(seq_len(256), c("index", "loss", "mse", "val_loss", "val_mse")))) 
+
+
+for (i in seq_len(256)) {
+  metrics_df[i,] <- c(i, unlist(lapply(model_list[[i]]$history$metrics, tail, 1)))
+}
+
+
+plot(sort(metrics_df$loss))
+
+sorted_metrics <- metrics_df[order(metrics_df$val_loss),]
+
+min(metrics_df)
+
+model_list[[54]]
+
+for (row in seq_along(tune_grid)) {
+  for (metric in seq_along(metrics_df)){
+    hist(models_and_metrics[metric + ncol(tune_grid)] 
+  }
+}
+
+
+
+## Extract best fit and predictions etc. ---------------------------------------
 
 # Tune:
-#   Batchsize
-#   Epochs
-#   Nodes per layer
-#   Activation functions per layer
-#   Exponential vs. Softplus
-#   Number of hidden layers
+#   DONE: Batchsize 
+#   DONE: Epochs
+#   DONE: Nodes per layer
+#   DONE: Activation functions per layer
+#   DONE: Exponential vs. Softplus
+#   TODO: Number of hidden layers
+
+
