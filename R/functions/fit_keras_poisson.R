@@ -17,6 +17,7 @@ fit_keras_poisson <- function(
     lr = lr,
     m = m
   )
+  log_info("Start Model Training")
   print(params)
   # Construct model architecture
   model <- keras_model_sequential()
@@ -46,5 +47,6 @@ fit_keras_poisson <- function(
     )
   params <- append(params, Sys.time() - start)
 
+  log_info("Done")
   list(model = model, history = history, params = params)
 }
