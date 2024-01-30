@@ -90,40 +90,17 @@ for (i in (length(model_list)+1):nrow(tune_grid)) {
   log_info("Finish Loop")  
 }
 
-save.image("Tune.Rdata")
-
-model_list <- readRDS("model_list.rds")
-
-model_list
-
-metrics_df <- data.frame(
-  matrix(rep(numeric(256), 5), ncol = 5,
-  dimnames = list(seq_len(256), c("index", "loss", "mse", "val_loss", "val_mse")))) 
-
-
-for (i in seq_len(256)) {
-  metrics_df[i,] <- c(i, unlist(lapply(model_list[[i]]$history$metrics, tail, 1)))
-}
-
-
-plot(sort(metrics_df$loss))
-
-sorted_metrics <- metrics_df[order(metrics_df$val_loss),]
-
-min(metrics_df)
-
-model_list[[54]]
-
-for (row in seq_along(tune_grid)) {
-  for (metric in seq_along(metrics_df)){
-    hist(models_and_metrics[metric + ncol(tune_grid)] 
-  }
-}
-
-
-
 ## Extract best fit and predictions etc. ---------------------------------------
+metrics.df <- data.frame(
+  matrix(rep(numeric(256), 5), ncol = 5,
+         dimnames = list(seq_len(256), c("index", "loss", "mse", "val_loss", "val_mse")))) 
 
+
+for (i in seq_len(nrow(metrics.df))) {
+  metrics.df[i,] <- c(i, unlist(lapply(model_list[[i]]$history$metrics, tail, 1)))
+}
+
+# TODO -------------------------------------------------------------------------
 # Tune:
 #   DONE: Batchsize 
 #   DONE: Epochs
