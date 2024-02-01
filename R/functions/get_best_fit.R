@@ -1,4 +1,4 @@
-get_best_fit <- function(model_list) {
+get_best_fit <- function(model_list, tune_grid) {
   metrics.df <- data.frame(
     matrix(rep(numeric(length(model_list)), 5), ncol = 5,
            dimnames = list(seq_len(256), 

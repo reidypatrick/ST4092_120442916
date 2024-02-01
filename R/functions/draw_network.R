@@ -36,7 +36,7 @@ draw_network <- function(n_input = 43,
             \\path (",margin+h_scale*4,",",v_scale*(-4),") node[circle, draw, fill=green!20] (hidden24) {$h_{2, {", n_hidden2, "}}$};
     
             % Output layer
-            \\path (",margin+scale*6,",",v_scale*(-2.5),") node[circle, draw, fill=red!20] (output) {$y$};
+            \\path (",margin+h_scale*6,",",v_scale*(-2.5),") node[circle, draw, fill=red!20] (output) {$y$};
     
             % Connect nodes
             \\foreach \\i in {1,...,4}
