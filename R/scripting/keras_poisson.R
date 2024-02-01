@@ -10,7 +10,7 @@ source_functions()
 log_info("Download OpenML dataset")
 data <- OpenML::getOMLDataSet(data.id = 41214)
 
-# Preprocess the data ---------------------------------------------------------
+# Preprocess the data ----------------------------------------------------------
 log_info("Preprocess data")
 df.n <- data$data %>% 
   dplyr::select(where(is.numeric)) %>% 
@@ -91,10 +91,33 @@ for (i in (length(model_list)+1):nrow(tune_grid)) {
 }
 
 ## Extract best fit and predictions etc. ---------------------------------------
+if (!exists("model_list")){
+  model_list <- readRDS("data/objects/model_list.rds")
+}
+
+best_fit <- get_best_fit(model_list)
+
+best_model <- fit_keras_poisson(
+  x_train,
+  y_train,
+  nodes = c(best_fit$t_hidden_nodes1, best_fit$t_hidden_nodes2),
+  batchsize = best_fit$batchsize,
+  n_epochs = best_fit$epochs,
+  act_funs = c(best_fit$t_hidden_act1, 
+               best_fit$t_hidden_act2, 
+               best_fit$final_act),
+  lr = best_fit$learn_rate)
+
 metrics.df <- data.frame(
   matrix(rep(numeric(256), 5), ncol = 5,
-         dimnames = list(seq_len(256), c("index", "loss", "mse", "val_loss", "val_mse")))) 
+         dimnames = list(seq_len(256), 
+                         c("index", "loss", "mse", "val_loss", "val_mse")))) 
 
+
+draw_network_from_model(model = best_model, name = "figNetwork2", show = TRUE)
+
+
+shell("start data/figures/figNetwork2.pdf")
 
 for (i in seq_len(nrow(metrics.df))) {
   metrics.df[i,] <- c(i, unlist(lapply(model_list[[i]]$history$metrics, tail, 1)))
