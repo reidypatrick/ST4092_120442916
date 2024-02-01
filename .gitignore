@@ -61,3 +61,6 @@ __pycache__/
 
 # all output folder for now
 output/
+
+# tex debug files
+*.tex

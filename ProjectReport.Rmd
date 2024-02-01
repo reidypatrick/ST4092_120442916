@@ -12,8 +12,8 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: FALSE
-    extra_dependencies: "subfig"
+    keep_tex: TRUE
+    extra_dependencies: ["subfig", "tikz"]
   author:
   - name: "Patrick Reidy"
     affiliation: "School of Mathematical Sciences, University College Cork"
@@ -24,6 +24,8 @@ header-includes:
   - \pretitle{\begin{center}
     \includegraphics[width=4in,height=2in]{data/figures/University_College_Cork_logo.png}\LARGE\\}
   - \posttitle{\end{center}}
+  
+
 
 editor_options: 
   chunk_output_type: inline
@@ -43,13 +45,12 @@ library(ggplot2)
 library(gridExtra)
 library(knitr)
 library(kableExtra)
+library(keras)
 
 source("R/functions/source_functions.R")
 source_functions()
 
-data <- OpenML::getOMLDataSet(data.id = 41214)
-
-cars_orig <- data$data
+cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
 
 \newpage
@@ -234,9 +235,6 @@ cars_orig %>%
 
 wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
 dsn <- file.path(wd, "data/input/shapefile")
-
-shape <- shapefile(file.path(dsn, "FRA_adm1.shp")) 
-
 ```
 
 Before investigating the performance of the models, we carry out a number of investigations regarding the structure and behaviour of the data. This is important in identifying which methods to use, issues to address and results to expect.
@@ -265,12 +263,11 @@ See Figure \@ref(fig:figHist-4)
 
 ```{r figCor, echo=FALSE, fig.cap = "Correlation Heatmap of Features", fig.path = "data/figures/"}
 par(mfrow = c(1, 1))
-cars_numeric <- cars_orig %>%
+cars_orig %>%
   mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
   mutate(VehGas = as.numeric(VehGas == "Diesel")) %>%
-  dplyr::select(-IDpol)
-
-cor(cars_numeric) %>%
+  dplyr::select(-IDpol) %>% 
+  cor() %>% 
   heatmap(keep.dendro = FALSE)
 ```
 
@@ -337,13 +334,11 @@ ggplot(cars_orig, aes(x = Exposure)) +
 ### GLMs
 
 ```{r glmSetup, include=TRUE, echo = FALSE}
-# Get dataframe
-cars_glm <- cars_orig %>% 
+# Get dataframe and split
+cars_split <- cars_orig %>% 
   dplyr::select(-IDpol) %>% 
-  dplyr::select(where(is.factor), everything())
-
-# Split data
-cars_split <- initial_split(cars_glm, prop = 0.8)
+  dplyr::select(where(is.factor), everything()) %>% 
+  initial_split(prop = 0.8)
 train <- training(cars_split)
 test <- testing(cars_split)
 ```
@@ -359,7 +354,7 @@ Yielding:
 ```{r glmSummaryCoef, include = TRUE, echo = FALSE}
 glmSum <- summary(glm1)
 
-glmSum$coefficients %>% 
+summary(glm1)$coefficients %>% 
   as_tibble() %>% 
   mutate(
     " " = rownames(glmSum$coefficients),
@@ -411,13 +406,14 @@ cat(
 Alternatively for more robust feature selection one can use backwards elimination
 
 ```{r glmBackElim, include = TRUE, echo = TRUE}
-backward_elimination <- stats::step(glm1, direction = "backward", trace = 0)
+# backward elimination takes a while to run, for brevity's sake and testing
+# only run when needed
+backward_elimination <- get_backward_elimination("object")
 ```
 
 ```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
-glmBackElimSum <- summary(backward_elimination)
-
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+glmBackElimSum <- summary(backward_elimination)
 
 glmBackElimSum$coefficients %>% 
   as_tibble() %>% 
@@ -467,7 +463,6 @@ predictions <- predict(glm1, newdata = test, type = "response") %>%
   as_tibble() %>% 
   mutate(index = seq(nrow(test)))
 
-
 val_data <- test %>% 
   mutate(index = seq(nrow(test))) %>% 
   left_join(predictions, join_by(index))
@@ -487,13 +482,106 @@ We can also look at a selection of predictions made from the resulting model:
 head(val_data) %>% 
   dplyr::select(-index) %>% 
   relocate(ClaimNb, .before = value) %>% 
-  mutate(Prediction = exp(value)) %>% 
+  mutate(Prediction = value) %>% 
   kable(format = "latex", booktabs = TRUE,
     caption = "Predictions from GLM on testing data") %>% 
   kable_styling(latex_options = "scale_down") %>% 
   kable_styling(latex_options = "striped") %>% 
   kable_styling(latex_options = "HOLD_position") %>%
   column_spec(11:12, color = "gray", bold  = TRUE) 
+```
+
+### Neural Networks
+
+```{r nnSetup, include = TRUE, echo = FALSE}
+log_info("Preprocess data")
+df.n <- cars_orig %>% 
+  dplyr::select(where(is.numeric)) %>% 
+  mutate(across(c(where(is.numeric), -IDpol, -ClaimNb), ~ scale_col(.)))
+
+df <- cars_orig %>% 
+  mutate(ClaimNb = as.integer(ClaimNb)) %>% 
+  dplyr::select(c(IDpol, !where(is.numeric))) %>% 
+  mutate(VehGas = as.integer(VehGas == "Diesel")) %>% 
+  left_join(df.n, join_by(IDpol)) %>% 
+  dplyr::select(-IDpol)
+
+## Create Recipe ---------------------------------------------------------------
+recipe <- recipe(ClaimNb ~ ., data = df) %>%
+  step_dummy(all_factor())
+
+## Bake Data -------------------------------------------------------------------
+preprocessed_data <- prep(recipe, training = df, retain = TRUE)
+baked_data <- bake(preprocessed_data, new_data = NULL)
+
+## Split Data ------------------------------------------------------------------
+log_info("Test/train split")
+indices <- sample(1:nrow(df), 0.8 * nrow(df))
+train_data <- baked_data[indices, ] 
+test_data <- baked_data[-indices, ] 
+
+x_train <- train_data %>% dplyr::select(-ClaimNb)
+x_test <- test_data %>% dplyr::select(-ClaimNb) %>% as.matrix()
+
+y_train <- train_data$ClaimNb
+y_test <- test_data$ClaimNb
+```
+
+```{r nnTune, include = TRUE, echo = FALSE}
+# Define tuning grid
+t_batchsize <- c(512,1024)
+t_epochs <- c(30,50)
+t_act_final <- c("softplus", "exponential")
+t_lr <- c(0.01,0.001)
+
+t_hidden_nodes <- c(16,32)
+t_hidden_act <- c("relu", "tanh")
+
+tune_grid = expand.grid(
+  batchsize = t_batchsize, 
+  epochs = t_epochs, 
+  final_act  = t_act_final, 
+  learn_rate = t_lr,
+  t_hidden_act1 = t_hidden_act, t_hidden_nodes1 = t_hidden_nodes,
+  t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes)
+```
+
+```{r nnFit, include = TRUE, echo = FALSE}
+# Get list of fits from tuning
+if (!exists("model_list")){
+  model_list <- readRDS("data/objects/model_list.rds")
+}
+
+# Select best fit based on mse
+best_fit <- get_best_fit(model_list)
+
+# Fit best model
+best_model <- fit_keras_poisson(
+  x_train,
+  y_train,
+  nodes = c(best_fit$t_hidden_nodes1, best_fit$t_hidden_nodes2),
+  batchsize = best_fit$batchsize,
+  n_epochs = best_fit$epochs,
+  act_funs = c(best_fit$t_hidden_act1, 
+               best_fit$t_hidden_act2, 
+               best_fit$final_act),
+  lr = best_fit$learn_rate)
+
+
+
+draw_network_from_model(model = best_model, name = "figNetwork", show = TRUE)
+```
+
+```{r nnFig, include = TRUE, echo = FALSE}
+knit_draw_model("figNetwork")
+```
+
+```{r nnMetrics}
+#Collect Metrics
+metrics.df <- data.frame(
+  matrix(rep(numeric(256), 5), ncol = 5,
+         dimnames = list(seq_len(256), 
+                         c("index", "loss", "mse", "val_loss", "val_mse")))) 
 ```
 
 ## Results
