@@ -537,7 +537,7 @@ t_lr <- c(0.01,0.001)
 t_hidden_nodes <- c(16,32)
 t_hidden_act <- c("relu", "tanh")
 
-tune_grid = expand.grid(
+tune_grid <- expand.grid(
   batchsize = t_batchsize, 
   epochs = t_epochs, 
   final_act  = t_act_final, 
@@ -548,12 +548,12 @@ tune_grid = expand.grid(
 
 ```{r nnFit, include = TRUE, echo = FALSE}
 # Get list of fits from tuning
-if (!exists("model_list")){
+if (!exists("model_list")) {
   model_list <- readRDS("data/objects/model_list.rds")
 }
 
 # Select best fit based on mse
-best_fit <- get_best_fit(model_list)
+best_fit <- get_best_fit(model_list, tune_grid)
 
 # Fit best model
 best_model <- fit_keras_poisson(
@@ -566,14 +566,10 @@ best_model <- fit_keras_poisson(
                best_fit$t_hidden_act2, 
                best_fit$final_act),
   lr = best_fit$learn_rate)
-
-
-
-draw_network_from_model(model = best_model, name = "figNetwork", show = TRUE)
 ```
 
 ```{r nnFig, include = TRUE, echo = FALSE}
-knit_draw_model("figNetwork")
+knit_draw_model(model = best_model$model, name = "figNetwork")
 ```
 
 ```{r nnMetrics}
