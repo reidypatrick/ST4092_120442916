@@ -101,6 +101,6 @@ if (!exists("model_list")){
 #   DONE: Nodes per layer
 #   DONE: Activation functions per layer
 #   DONE: Exponential vs. Softplus
-#   TODO: Number of hidden layers
+#   DONE: Number of hidden layers
 
 

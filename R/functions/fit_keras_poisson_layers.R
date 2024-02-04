@@ -9,6 +9,9 @@ fit_keras_poisson_layers <- function(
     lr = 0.001,
     m = c("mean_squared_error"),
     verbose = 1) {
+  # Function for fitting n layer keras FFNN, with options for tuning but
+  # minimal error handling w.r.t alignment of layers, nodes and activation
+  # functions
   
   # log system time
   start <- Sys.time()

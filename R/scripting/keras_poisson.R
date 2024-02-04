@@ -130,6 +130,6 @@ for (i in seq_len(nrow(metrics.df))) {
 #   DONE: Nodes per layer
 #   DONE: Activation functions per layer
 #   DONE: Exponential vs. Softplus
-#   TODO: Number of hidden layers
+#   DONE: Number of hidden layers => see fit_keras_poisson_layers
 
 
