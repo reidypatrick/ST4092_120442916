@@ -6,7 +6,8 @@ fit_keras_poisson <- function(
     n_epochs = 30,
     act_funs = c("relu", "relu", "exponential"),
     lr = 0.001,
-    m = c("mean_squared_error")) {
+    m = c("mean_squared_error"),
+    verbose = 1) {
   # log system time
   start <- Sys.time()
   # Save and print parameters
@@ -17,8 +18,10 @@ fit_keras_poisson <- function(
     lr = lr,
     m = m
   )
-  log_info("Start Model Training")
-  print(params)
+  if (verbose == 1) {
+    log_info("Start Model Training")
+    print(params)
+  }
   # Construct model architecture
   model <- keras_model_sequential()
   model %>%
@@ -43,10 +46,12 @@ fit_keras_poisson <- function(
       y = y_train %>% as.matrix(),
       epochs = n_epochs,
       batch_size = batchsize,
-      validation_split = 0.2
+      validation_split = 0.2,
+      verbose = verbose
     )
   params <- append(params, Sys.time() - start)
 
-  log_info("Done")
+  if (verbose == 1) {log_info("Done")}
+  
   list(model = model, history = history, params = params)
 }
