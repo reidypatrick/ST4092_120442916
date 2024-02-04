@@ -1,7 +1,7 @@
 get_best_fit <- function(model_list, tune_grid) {
   metrics.df <- data.frame(
     matrix(rep(numeric(length(model_list)), 5), ncol = 5,
-           dimnames = list(seq_len(256), 
+           dimnames = list(seq_along(model_list), 
                            c("index", "loss", "mse", "val_loss", "val_mse")))) 
   
   
