@@ -546,7 +546,7 @@ tune_grid <- expand.grid(
   t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes)
 ```
 
-```{r nnFit, include = TRUE, echo = FALSE}
+```{r nnFit, echo = FALSE}
 # Get list of fits from tuning
 if (!exists("model_list")) {
   model_list <- readRDS("data/objects/model_list.rds")
@@ -556,16 +556,19 @@ if (!exists("model_list")) {
 best_fit <- get_best_fit(model_list, tune_grid)
 
 # Fit best model
-best_model <- fit_keras_poisson(
-  x_train,
-  y_train,
-  nodes = c(best_fit$t_hidden_nodes1, best_fit$t_hidden_nodes2),
-  batchsize = best_fit$batchsize,
-  n_epochs = best_fit$epochs,
-  act_funs = c(best_fit$t_hidden_act1, 
-               best_fit$t_hidden_act2, 
-               best_fit$final_act),
-  lr = best_fit$learn_rate)
+if (!exists("best_model")) {
+  best_model <- fit_keras_poisson(
+    x_train,
+    y_train,
+    nodes = c(best_fit$t_hidden_nodes1, best_fit$t_hidden_nodes2),
+    batchsize = best_fit$batchsize,
+    n_epochs = best_fit$epochs,
+    act_funs = c(best_fit$t_hidden_act1, 
+                 best_fit$t_hidden_act2, 
+                 best_fit$final_act),
+    lr = best_fit$learn_rate,
+    verbose = 0)
+}
 ```
 
 ```{r nnFig, include = TRUE, echo = FALSE}
@@ -575,9 +578,24 @@ knit_draw_model(model = best_model$model, name = "figNetwork")
 ```{r nnMetrics}
 #Collect Metrics
 metrics.df <- data.frame(
-  matrix(rep(numeric(256), 5), ncol = 5,
-         dimnames = list(seq_len(256), 
-                         c("index", "loss", "mse", "val_loss", "val_mse")))) 
+  matrix(rep(numeric(256), 5),
+    ncol = 5,
+    dimnames = list(
+      seq_len(256),
+      c("index", "loss", "mse", "val_loss", "val_mse")
+    )
+  )
+) %>% 
+  head() %>% 
+  kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Model Tuning Results",
+    row.names = FALSE
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "striped")
+  
 ```
 
 ## Results
