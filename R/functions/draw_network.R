@@ -1,10 +1,10 @@
-draw_network <- function(n_input = 43,
+draw_network <- function(name,
+                         n_input = 43,
                          n_hidden1 = 16,
                          n_hidden2 = 16,
                          margin = 0,
                          h_scale = 1,
-                         v_scale = 1,
-                         name){
+                         v_scale = 1){
   
   network_tex <- c(
     "
@@ -74,11 +74,12 @@ draw_network <- function(n_input = 43,
   
   withr::with_dir("data/figures", shell(cmd))
   
+  
+  
   withr::with_dir("data/figures",
     file.remove(c(
       list.files(pattern = ".*\\.log.*"),
-      list.files(pattern = ".*\\.aux.*"),
-      list.files(pattern = ".*\\.tex.*"))
+      list.files(pattern = ".*\\.aux.*"))
     )
   )
 }
