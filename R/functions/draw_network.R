@@ -79,7 +79,8 @@ draw_network <- function(name,
   withr::with_dir("data/figures",
     file.remove(c(
       list.files(pattern = ".*\\.log.*"),
-      list.files(pattern = ".*\\.aux.*"))
+      list.files(pattern = ".*\\.aux.*")),
+      list.files(pattern = ".*\\.tex.*"))
     )
   )
 }

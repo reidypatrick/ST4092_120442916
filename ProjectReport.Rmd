@@ -12,7 +12,7 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: TRUE
+    keep_tex: FALSE
     extra_dependencies: ["subfig", "tikz"]
   author:
   - name: "Patrick Reidy"
@@ -601,7 +601,8 @@ cat(get_network_tex_from_model(best_model))
 ```
 
 ```{r, nnCompGraph, results='asis', echo=FALSE}
-cat(get_computation_graph_tex())
+cat(get_computation_graph_tex(
+  act_funs = c(best_model$ac)))
 
 ```
 
