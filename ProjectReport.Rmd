@@ -24,6 +24,8 @@ header-includes:
   - \pretitle{\begin{center}
     \includegraphics[width=4in,height=2in]{data/figures/University_College_Cork_logo.png}\LARGE\\}
   - \posttitle{\end{center}}
+  - \usepackage{tikz}
+  - \usetikzlibrary{positioning, arrows.meta, shapes.geometric}
   
 
 
@@ -571,10 +573,6 @@ if (!exists("best_model")) {
 }
 ```
 
-```{r nnFig, include = TRUE, echo = FALSE}
-knit_draw_model(model = best_model$model, name = "figNetwork")
-```
-
 ```{r nnMetrics}
 #Collect Metrics
 metrics.df <- data.frame(
@@ -596,6 +594,15 @@ metrics.df <- data.frame(
   kable_styling(latex_options = "HOLD_position") %>% 
   kable_styling(latex_options = "striped")
   
+```
+
+```{r nnFig, results='asis', echo=FALSE}
+cat(get_network_tex_from_model(best_model))
+```
+
+```{r, nnCompGraph, results='asis', echo=FALSE}
+cat(get_computation_graph_tex())
+
 ```
 
 ## Results
