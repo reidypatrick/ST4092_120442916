@@ -81,7 +81,6 @@ draw_network <- function(name,
       list.files(pattern = ".*\\.log.*"),
       list.files(pattern = ".*\\.aux.*")),
       list.files(pattern = ".*\\.tex.*"))
-    )
   )
 }
 
