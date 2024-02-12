@@ -1,4 +1,4 @@
-get_backward_elimination <- function(how = "object") {
+get_backward_elimination <- function(how = "object", formula = NULL) {
   if (!exists("backward_elimination")) {
     if (how == "object") {
       log_info("Sourcing backward_elimination.rds")
@@ -6,7 +6,8 @@ get_backward_elimination <- function(how = "object") {
     }
     if (how == "run") {
       log_info("Running Backward Elimination")
-      backward_elimination <- stats::step(glm1, direction = "backward", trace = 0)
+      backward_elimination <- stats::step(formula,
+                                          direction = "backward", trace = 0)
     }
     log_info("Done")
   } else {
