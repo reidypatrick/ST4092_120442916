@@ -64,3 +64,9 @@ output/
 
 # tex debug files
 *.tex
+
+# rmd auxillary files
+*.aux
+*.out
+*.log
+*.toc
