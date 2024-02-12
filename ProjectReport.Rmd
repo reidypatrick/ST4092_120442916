@@ -12,7 +12,7 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: FALSE
+    keep_tex: TRUE
     extra_dependencies: ["subfig", "tikz"]
   author:
   - name: "Patrick Reidy"
@@ -22,10 +22,11 @@ output:
 header-includes:
   - \usepackage{titling}
   - \pretitle{\begin{center}
-    \includegraphics[width=4in,height=2in]{data/figures/University_College_Cork_logo.png}\LARGE\\}
+    \includegraphics[width=4in,height=2in]{data/figures/University_College_Cork_logo.png}\LARGE\}
   - \posttitle{\end{center}}
   - \usepackage{tikz}
   - \usetikzlibrary{positioning, arrows.meta, shapes.geometric}
+  - \usepackage{amsmath}
   
 
 
@@ -51,6 +52,8 @@ library(keras)
 
 source("R/functions/source_functions.R")
 source_functions()
+set_global_variables(verbose = 0,
+                     source = TRUE)
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
@@ -166,6 +169,164 @@ o Occupying the niche
   "The purpose of this study was to..."
 -->
 ```
+### Neural Networks
+
+#### Attempt 1
+
+If we recall the formula for the GLM:
+
+$$Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \ldots + \beta_pX_p + \epsilon$$
+
+We can also write this in matrix notation
+
+$$
+Y = \beta_0 + 
+\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
+\begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}
+$$
+
+When looking at neural networks, we see a familiar form for a simple network with no hidden layers (these will be discussed further later). A neural network typically takes the form:
+
+$$
+Y = \begin{bmatrix} W_{11} & \ldots & W_{1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}
+$$
+
+There are two key differences between this form and the previous:
+
+-   There is no intercept in the NN formula, meaning the response is not necessarily being made relative to some base case
+
+-   Rather than a row vector of coefficients, we instead use a $n\times p$ matrix of weights. This is especially useful in capturing relationships between variables. Of course the result of this is no longer a single value, but a vector of length $q$ which for now is arbitrarily chosen.
+
+In order to return a single value as desired, we must again multiply the results of this equation by a row vector of length $q$.
+
+$$
+Y = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+$$
+
+Here we now have two matrices of weights, $W_1$ and $W_2$ which results in a scalar output $Y$.
+
+#### Attempt 2
+
+If we recall our GLM formula of
+
+$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+We can rewrite this in matrix notation as
+
+$$
+log(\mu) = \beta_0 + 
+\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
+\begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}
+$$
+
+Representing a full model of $p$ independent variables. However, for fitting a saturated model including all possible interactions, very quickly our number of variables grows to an unmanageable size. Computability, memory availability, and interpretability will all suffer. However, we can extend our set of coefficients into a matrix with an arbitrary amount of rows, say $q$ which each represent some relationship over all predictors. This will result in a formula that looks like
+
+$$
+           \begin{bmatrix} W_{11} & \ldots & W_{1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
+           \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix} 
+         = \begin{bmatrix} H_1 & \ldots & H_q\end{bmatrix} 
+$$
+
+This results in a vector of length $q$ which represents $q$ relationships from the model. Of course, as we desire a scalar output similar to how a GLM would produce, we would then need to multiply this by a column vector of length $q$ $$
+\hat{Y} = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+$$
+
+Where $\hat{Y}$ is our new scalar output and instead of one matrix of coefficients $W$ we have $W_1$ and $W_2$. It may also at this stage be helpful to make an adjustment similar to what we do for interpreting GLMs where
+
+$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+And after getting the exponential of both sides, this becomes equivalent to
+
+$$\mu = exp(\beta_0 + \beta_1X_1 +...+ \beta_pX_p)$$
+
+And applying this to our matrix notation we now get
+
+$$
+\hat{Y} = exp\left(\begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}\right)
+$$ It is clear that with the nesting of these processes, the architecture becomes very difficult to understand. We can write this in a more sequential pattern as following:
+
+$$
+\hat{Y} = \begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \ 
+                    \vdots & \ddots & \vdots \
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+          \begin{bmatrix} X_1 \ \vdots \ X_p\end{bmatrix}
+        = \begin{bmatrix} H_1 & \ldots & H_q\end{bmatrix} 
+\Rightarrow
+          \begin{bmatrix} H_1 & \ldots & H_q\end{bmatrix}
+   \times \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+\Rightarrow
+    exp()
+$$
+
+This can be made even clearer visually by representing vectors and matrices as nodes in a network, and producing a computation graph.
+
+```{r, simpleCompGraph, results='asis', echo = FALSE}
+cat(c(
+  "
+  \\begin{figure}
+    \\centering
+      \\begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
+      % Input layer
+      \\node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
+      \\node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
+      
+      \\node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
+      
+      
+      % Labels
+      \\node[above=0.5cm of X] {Input Layer};
+      
+      % Connect Nodes
+      \\draw[->] (X) -- (star1);
+      \\draw[->] (W1) -- (star1);
+      
+      
+      
+      % First Hidden Layer
+      \\node[circle, draw, fill=blue!20] (W2) at (2,-2) {$W_2$};
+      
+      \\node[circle, draw, fill=green!20] (star2) at (3,-1) {$*$};
+      
+      
+      % Connect Nodes
+      \\draw[->] (star1) -- (star2);
+      \\draw[->] (W2) -- (star2);
+      
+      
+      
+      
+      % Final Layer
+      \\node[circle, draw, fill=green!20] (link) at (4,-1) {$exp$};
+      \\node[circle, draw, fill=yellow!20] (output) at (5,-1) {$\\hat{y}$};
+      
+      % Connect Nodes
+      \\draw[->] (star2) -- (link);
+      \\draw[->] (link) -- (output);
+    
+    \\end{tikzpicture}
+    \\caption{Computation Graph of Neural Network}
+    \\label{fig:neural_network_computation_graph}
+  \\end{figure}
+  "))
+```
+
 # Literature Review
 
 # Methodology
@@ -408,9 +569,11 @@ cat(
 Alternatively for more robust feature selection one can use backwards elimination
 
 ```{r glmBackElim, include = TRUE, echo = TRUE}
-# backward elimination takes a while to run, for brevity's sake and testing
-# only run when needed
-backward_elimination <- get_backward_elimination("object")
+if (global_variables$source == TRUE) {
+  backward_elimination <- get_backward_elimination("object")
+} else {
+  backward_elimination <- get_backward_elimination("run")
+}
 ```
 
 ```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
@@ -490,7 +653,7 @@ head(val_data) %>%
   kable_styling(latex_options = "scale_down") %>% 
   kable_styling(latex_options = "striped") %>% 
   kable_styling(latex_options = "HOLD_position") %>%
-  column_spec(11:12, color = "gray", bold  = TRUE) 
+  column_spec(11:12, bold  = TRUE) 
 ```
 
 ### Neural Networks
@@ -550,7 +713,7 @@ tune_grid <- expand.grid(
 
 ```{r nnFit, echo = FALSE}
 # Get list of fits from tuning
-if (!exists("model_list")) {
+if (global_variables$source == TRUE) {
   model_list <- readRDS("data/objects/model_list.rds")
 }
 
@@ -558,7 +721,9 @@ if (!exists("model_list")) {
 best_fit <- get_best_fit(model_list, tune_grid)
 
 # Fit best model
-if (!exists("best_model")) {
+if (global_variables$source == TRUE) {
+  best_model <- readRDS("data/objects/best_model.rds")
+} else {
   best_model <- fit_keras_poisson(
     x_train,
     y_train,
@@ -573,7 +738,7 @@ if (!exists("best_model")) {
 }
 ```
 
-```{r nnMetrics}
+```{r nnMetrics, include = TRUE, echo = FALSE}
 #Collect Metrics
 metrics.df <- data.frame(
   matrix(rep(numeric(256), 5),
@@ -596,13 +761,22 @@ metrics.df <- data.frame(
   
 ```
 
-```{r nnFig, results='asis', echo=FALSE}
-cat(get_network_tex_from_model(best_model))
+Below we can see the architecture of the neural network
+
+```{r, nnFigNetwork, results='asis', echo=FALSE}
+cat(get_network_tex(
+    n_input = best_model$model$layers[[1]]$input_shape[[2]],
+    n_hidden1 = best_model$model$layers[[2]]$input_shape[[2]],
+    n_hidden2 = best_model$model$layers[[3]]$input_shape[[2]]))
 ```
+
+Below we can see the computation graph of the neural network
 
 ```{r, nnCompGraph, results='asis', echo=FALSE}
 cat(get_computation_graph_tex(
-  act_funs = c(best_model$ac)))
+  act_funs = as.character(c(best_fit$t_hidden_act1,
+                            best_fit$t_hidden_act2,
+                            "exp"))))
 
 ```
 
