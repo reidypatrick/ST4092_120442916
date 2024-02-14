@@ -11,6 +11,7 @@ email: "120442916@umail.ucc.ie"
 
 output: 
   bookdown::pdf_document2:
+    toc: FALSE
     latex_engine: xelatex
     fig_crop: no
     keep_tex: FALSE
@@ -28,6 +29,7 @@ header-includes:
   - \posttitle{\end{center}}
   - \usepackage{tikz}
   - \usetikzlibrary{positioning, arrows.meta, shapes.geometric}
+  - \pagebreak
   
 
 
@@ -54,7 +56,7 @@ source_functions()
 
 \pagebreak
 
-\tableoffigures
+\listoffigures
 
 \pagebreak
 
@@ -76,7 +78,7 @@ $$
 
 Where $\hat{Y} = (\hat{y_1}, ..., \hat{y_n})$ are our predicted $y_i$ values based on the corresponding $x_i$, $\beta_0$ is the intercept term, and $\beta_1$ is the slope coefficient.
 
-```{r figLMLSE, include=TRUE, echo=FALSE}
+```{r figLMLSE, include=TRUE, echo=FALSE, fig.cap="Linear Model: LSE"}
 # Set seed for reproducibility
 set.seed(123)
 
@@ -97,7 +99,6 @@ plot(
   y_true,
   col = "blue",
   pch = 20,
-  main = "Linear Model: LSE",
   xlab = "X",
   ylab = "Y"
 )
@@ -154,7 +155,7 @@ A different approach lies in understanding that often we can assume the followin
 
 3.  We can estimate these $\mu_i$ with a line of the form $\mu_i = \beta_0 + \beta_1X_i$
 
-```{r figLMMLE}
+```{r figLMMLE, fig.cap = "Linear Model: MLE"}
 # Set seed for reproducibility
 set.seed(123)
 
@@ -194,7 +195,7 @@ legend(
   legend = c(
     expression(y[i]),
     expression(
-      paste("f(y"[i], " | y"[i], " ~ N(", u[i], ", ", sigma^2, "))")
+      paste("f(y"[i], " | y"[i], " ~ N(", mu[i], ", ", sigma^2, "))")
     ),
     expression(hat(Y) == beta[0] + beta[1] * X)
   ),
@@ -320,7 +321,7 @@ With the combined notions of the MLE and the EDF, we can generalise this process
 
 # Generalised Linear Models
 
-```{r figGLMMLE}
+```{r figGLMMLE, fig.cap = "Non-linear Model"}
 set.seed(09022024)
 x <- 1:25
 y_true <- x * rexp(25, rate = 1)
@@ -339,7 +340,6 @@ plot(
   y_true,
   col = "blue",
   pch = 20,
-  main = "Generalised Linear Model",
   xlab = "X",
   ylab = "Y",
   ylim = c(0, 85)
@@ -370,11 +370,11 @@ Here we see that our $y_is$ are clearly not distributed normally, rather by some
 
 For the purpose of this report, we will be looking at insurance claim as a count, which is known to follow a Poisson distribution, the density of which can be seen below.
 
-```{r figPoiHist}
+```{r figPoiHist, fig.cap = "Histogram of a Poisson Random Variable"}
 set.seed(120442916)
 y <- rpois(100, 4)
 
-hist(y, freq = FALSE, main = "Histogram of a Poisson Random Variable")
+hist(y, freq = FALSE)
 lines(density(y), lwd = 2, col = "green")
 ```
 
