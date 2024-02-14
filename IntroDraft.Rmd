@@ -56,7 +56,7 @@ $$
 \hat{Y} = \beta_0 + \beta_1X \\
 $$
 
-Or for each obseravtion
+Or for each observation
 
 $$
 \hat{y_i} = \beta_0 + \beta_1x_i
@@ -91,7 +91,7 @@ legend("topleft", legend = c(expression(y[i]), expression(y[i] - hat(y)[i]), exp
 
 ```
 
-Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also include are the green lines, which represent the difference between the prediction and true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate of our regression parameters $\beta_0$, $\beta_1$:
+Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also included are the green lines, which represent the difference between the prediction and the true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate (LSE) of our regression parameters $\beta_0$, $\beta_1$:
 
 $$
 LSE(\beta) = \min\sum(y_i-\hat{y}_i)^2
@@ -104,7 +104,17 @@ $$\hat{y_i} = \beta_0 + \beta_1x_i$$ We can write this as
 ```{=tex}
 \begin{equation} LSE(\beta) = \min\sum(y_i-(\beta_0+\beta_1x_i))^2 (\#eq:LSE) \end{equation}
 ```
-Now find, using partial derivatives, the $\beta_0$ and $\beta_1$ that minimise this value.
+Now we can find, using partial derivatives, the $\beta_0$ and $\beta_1$ that minimise this value.
+
+This can also be extended for Multiple Linear Regression, where we have more than one predictor variable $x$, and instead we use the formula
+
+$$
+\hat{y_i} = \beta_0 + \sum^p_{j=1}\beta_jx_{ij}
+$$
+
+Where i = 1,...,n.
+
+However, for the time being, it will be assumed there is only one predictor variable $x$ for ease of notation.
 
 ## Maximum Likelihood Estimator
 
@@ -145,13 +155,13 @@ legend("topleft", legend = c(expression(y[i]), expression(paste("f(y"[i], " | y"
        col = c("blue", "green", "red"), pch = c(20, NA, NA), lty = c(NA, 1, 1), cex = 0.8)
 ```
 
-Above is a representation of this assumption, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
+Above is a representation of these assumptions, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
 
 $$
 \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
 $$
 
-To find the join probability across all observations we get
+To find the joint probability across all observations we get
 
 $$
 \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
@@ -160,7 +170,7 @@ $$
 But recall that $\mu_i = \beta_0+\beta_1x_i$, and we would like to maximise this probability with respect to the $\beta's$. We can write this as instead a likelihood function
 
 $$
-L(\beta|Y) = \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
+\mathcal{L}(\beta|Y) = \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
 $$
 
 We know that any $\beta$ that maximises this function also maximises the log likelihood function denoted $\ell(\beta|Y)$, which also helps in evaluating the right hand side
@@ -175,7 +185,7 @@ $$
 \ell(\beta|Y) = -\sum(y_i-\mu_i)^2
 $$
 
-We now want to maximise this value, but as it is a negative quantity, this is the same as minimising the negative of the function, and notate this as our Maximum Likelihood Estimator (MSE)
+We now want to maximise this value, but as it is a negative quantity, this is the same as minimising the negative of the function, and notate this as our Maximum Likelihood Estimator (MLE)
 
 $$
 MLE(\beta) = \min\sum(y_i-\mu_i)^2
@@ -186,7 +196,11 @@ If we replace $\mu_i$ with our linear model, we get
 ```{=tex}
 \begin{equation} MLE(\beta) = \min\sum(y_i-(\beta_0 + \beta_1x_i)^2 (\#eq:MLE) \end{equation}
 ```
-In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Dispersion Family.
+Note: Once again, this form can be extended for multiple predictor variables $x$, where it takes the form
+
+$$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
+
+In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Dispersion Family (EDF).
 
 # Exponential Dispersion Family
 
@@ -195,6 +209,30 @@ Nelder and Wedderburn @nelder_1972_generalized devised a method for generalising
 ```{=tex}
 \begin{equation} f(y) = exp\left(\frac{y\theta - b(\theta)}{a(\phi)} + c(y, \phi)\right) (\#eq:EDF) \end{equation}
 ```
+Where:
+
+-   $y$ is some observation from a distribution in the EDF
+
+-   $\theta$ is called the natural or canonical parameter, that itself can be expressed as some function of the true mean as $g(\mu)$
+
+-   $\phi$ is called the dispersion parameter
+
+-   $a$, $b$ and $c$ are some known functions of these parameters
+
+It is further shown that by treating the above as a likelihood, and maximising with respect to $\theta$
+
+$$
+\frac{\partial\mathcal{L}}{\partial\theta} = y-b'(\theta) := 0
+$$
+
+Where $b'(\theta)$ will be equal to the true mean of this distribution, so
+
+$$
+\frac{\partial\mathcal{L}}{\partial\theta} = y-\mu = 0
+$$
+
+In other words, finding some optimal predictor for $\theta$ will effectively obtain the best estimate for the true mean of the distribution from which $y$ comes.
+
 For the normal distribution we can see that we can take
 
 $$
@@ -222,30 +260,13 @@ c(y,\phi) & = - \frac{y^2}{2\sigma^2} -
 \frac{1}{2}log(2\pi\sigma^2)
 \end{align*}
 ```
-For the poisson distribution, we begin with
+Here, our natural parameter $\theta$ is simply equal to the mean $\mu$, with $g(\theta)$ simply being the identity function. It is also demonstrated here that
 
 $$
-f(y) = \frac{e^{-\lambda}\lambda^y}{y!}
+b'(\theta) = \frac{d}{d\theta}\frac{\theta^2}{2} = \theta = \mu
 $$
 
-This can be written as
-
-$$
-f(y) = exp\left(-\lambda + y\log(\lambda) -\log(y!) \right)
-$$
-
-And so to obtain \@ref(eq:EDF) we choose
-
-```{=tex}
-\begin{align*}
-\theta & = \log(\lambda) &
-b(\theta) = e^\theta = \lambda \\
-\phi & = 1 & 
-a(\phi) = 1 \\
-c(y,\phi) & = -\log(y!)
-\end{align*}
-```
-*Why we can infer the link function from the EDF, using Nelder and Wedderburn 1972*
+With the combined notions of the MLE and the EDF, we can generalise this process to work for any distribution in the EDF.
 
 # Generalised Linear Models
 
@@ -264,9 +285,9 @@ y_pred <- predict(model)
 # Plot the data and linear model
 plot(x, y_true, col = "blue", pch = 20, main = "Generalised Linear Model", xlab = "X", ylab = "Y", ylim = c(0,85))
 abline(model, col = "red")
-
-for (i in seq(1,25,4)) {
-  points <- rexp(100, rate = 0.5)
+ 
+for (i in seq(2,25,4)) {
+  points <- rexp(10000, rate = 0.5)
   d <- density(points)
   lines(i + d$y, y_true[i] + d$x, col = "green", lwd = 2)
 }
@@ -287,38 +308,38 @@ hist(y, freq = FALSE, main = "Histogram of a Poisson Random Variable")
 lines(density(y), lwd = 2, col = "green")
 ```
 
+For the poisson distribution, we begin with
+
+$$ f(y) = \frac{e^{-\lambda}\lambda^y}{y!} $$
+
+This can be written as
+
 ```{=tex}
-\begin{align*}
-LSE(\beta_0, \beta_1 | y_i) & = \sum^n_{i=1}(y_i-\hat{y_i})^2 \\
-& = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\
-MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\mu_i = \beta_0+\beta_1Xi|y_i) \\
-& = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\
-MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\theta_i = g(\mu_i) = \beta_0+\beta_1Xi|y_i) \\
-& = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2
-\end{align*}
+\begin{align*} f(y) & = exp\left(-\lambda + y\log(\lambda) -\log(y!) \right) \tag{**} \\ f(y) & = exp\left( \frac{y\log(\lambda) - \lambda}{1} -\log(y_i!)\right)  \end{align*}
 ```
-For a poisson distribution
+And so to obtain \@ref(eq:EDF) we choose
 
-$$
-\begin{align*}
-MLE(\beta_0, \beta_1|y_i) & = \arg\max_{\beta_0,\beta_1} \mathcal{L}(\theta_i=g(\lambda_i) = \log(\lambda_i) = \beta_0+\beta_1x_i|y_i) \\
-& = \sum^n_{i=1}y_i\theta_i + \exp(\theta_i) + \log(y_i!) \\
-& = \sum_{i=1}^ny_i\log(\lambda_i) - \lambda_i +\log(y_i!)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-\end{align*}
-$$
+```{=tex}
+\begin{align*} \theta & = \log(\lambda) & b(\theta) = e^\theta = \lambda \\ \phi & = 1 &  a(\phi) = 1 \\ c(y,\phi) & = -\log(y!) \end{align*}
+```
+And in this case our natural parameter $\theta$ is equal to the log of our true mean $\lambda$. From this we conclude that to best predict the true mean of the distribution of some $y_i \sim Poi(\lambda_i)$, we now fit a model to this function of $\lambda_i$.
 
-Structure of GLM defined through EDF
+$$ \log(\lambda_i) = \beta_0 + \beta_1x_i $$
 
-From this, discuss a poisson GLM and demonstrate formula and MLE.
+Or for multiple $x$
 
+```{=tex}
+\begin{equation} \log(\lambda_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij} (\#eq:GLM) \end{equation}
+```
 # Neural Networks
 
 ## Architecture
 
 Neural Networks (NNs), while possibly theorised in the mid 20th century, only began realising their potential in recent decades, as computational resources began to enable the architecture to outperform classical statistical models. A neural network consists of multiple layers, each containing nodes. Typically, a NN will have an input layer, which takes in a vector of inputs, multiplies this with a matrix of weights, adds a bias term to each output, and then applies an activation function which is used to capture non-linearity in the data, much like we have seen with the link function in GLMs, namely the log function in the context of Poisson GLMs. This yields
 
-$$ \hat{Y} =  \begin{bmatrix} W_{11} & \ldots & W_{1p} \\                      \vdots & \ddots & \vdots \\                     W_{q1} & \ldots & W_{qp}\end{bmatrix}    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}  + \begin{bmatrix}b_1 \\ \vdots \\ b_p\end{bmatrix} $$
-
+```{=tex}
+\begin{equation}\hat{Y} =  \begin{bmatrix} W_{11} & \ldots & W_{1p} \\                      \vdots & \ddots & \vdots \\                     W_{q1} & \ldots & W_{qp}\end{bmatrix}    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}  + \begin{bmatrix}b_1 \\ \vdots \\ b_p\end{bmatrix} (\#eq:NN) \end{equation}
+```
 $$ Y = [WX+b \Rightarrow Activation Function] $$
 
 Where:
@@ -343,7 +364,7 @@ Where:
 
 -   The blue nodes $W_i, b_i$ are our matrices of weights and biases respectively.
 
--   The green nodes are functions, where an incoming arrows indicate inputs and outgoing arrow indicates output.
+-   The green nodes are functions, where incoming arrows indicate inputs and the outgoing arrow indicates output.
 
 -   The red nodes are the activation functions, which capture the non-linearity in the model. The final red node is our loss function, which is used to determine updates to be made to our trainable parameters (weights and biases).
 
@@ -361,33 +382,50 @@ Once again, computational constraints require that some method is used to optimi
 
 # Conclusion
 
-If we recall our GLM formula of
+If we recall \@ref(eq:GLM) our GLM formula of
 
-$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+$$\log(\lambda_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij}$$
 
 We can rewrite this in matrix notation as
 
-$$ log(\mu) = \beta_0 +  \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} $$
+$$ log(\lambda_i) = \beta_0 +  \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip}\end{bmatrix} $$
 
 We can rearrange this as:
 
-$$ log(\mu) = \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} + \beta_0 $$
+$$ log(\lambda_i) = \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip}\end{bmatrix} + \beta_0 $$
 
 And we consider this not as a linear model fitted to a function of some mean, but rather as the exponential of some linear function fitted to the mean we get
 
 ```{=tex}
 \begin{equation}
-\mu = exp \left( \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} + \beta_0 \right) 
+\lambda_i = exp \left( \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip} \end{bmatrix} + \beta_0 \right) 
 (\#eq:GLMNN)
 \end{equation}
 ```
-Now recall our NN formula
+Now recall our NN formula \@ref(eq:NN), except with no hidden layers we ge
 
 ```{=tex}
 \begin{equation}
-Y = ActivationFunction \left( \begin{bmatrix} W_1, \ldots, W_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} + b \right) (\#eq:NNGLM)
+\hat{y} = ActivationFunction \left( \begin{bmatrix} W_1, \ldots, W_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip} \end{bmatrix} + b \right) (\#eq:NNGLM)
 \end{equation}
 ```
 We see that designing a NN of 0 hidden layers, with exponential activation function will produce a function \@ref(eq:NNGLM) equivalent to that of a GLM \@ref(eq:GLMNN). When we also consider that our loss function was defined to be the MLE of a poisson distribution, we see also that the weights and bias of our NN our calculated the same way that a GLM calculates the regression parameters $\beta$.
 
+### Aside
+
+*Not sure if this is of any use, but took a while to write out so I've left it here*
+
+```{=tex}
+ \begin{align*} LSE(\beta_0, \beta_1 | y_i) & = \sum^n_{i=1}(y_i-\hat{y_i})^2 \\ & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\ MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\mu_i = \beta_0+\beta_1Xi|y_i) \\ & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\  MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\theta_i = g(\mu_i) = \beta_0   +\beta_1Xi|y_i)\tag{*}  \\  & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \end{align*}
+```
+For a poisson distribution we denote the means by $\lambda_i$, and we have found that $\theta_i = \log(\lambda_i)$ and can rewrite (\*) as
+
+```{=tex}
+\begin{align*} MLE(\beta_0, \beta_1|y_i) & = \arg\max_{\beta_0,\beta_1} \mathcal{L}(\theta_i=g(\lambda_i) = \log(\lambda_i) = \beta_0+\beta_1x_i|y_i) \\ & = \sum^n_{i=1}y_i\theta_i + \exp(\theta_i) + \log(y_i!) \tag{from (**)}\\ & = \sum_{i=1}^ny_i\log(\lambda_i) - \lambda_i +\log(y_i!) \end{align*}
+```
 \pagebreak
+
+# References
+
+::: {#refs}
+:::
