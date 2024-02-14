@@ -52,8 +52,10 @@ library(keras)
 
 source("R/functions/source_functions.R")
 source_functions()
-set_global_variables(verbose = 0,
-                     source = TRUE)
+set_global_variables(
+  verbose = 0,
+  source = TRUE
+)
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
@@ -519,7 +521,7 @@ head(cars_orig) %>%
     row.names = FALSE
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
-  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
   kable_styling(latex_options = "striped")
 ```
 
@@ -552,21 +554,22 @@ The description of the data as outlined in the documentation is as follows:
 -   *Region: The policy regions in France (based on a standard French classification) "*
 
 ```{r tableSum, echo=FALSE, include=TRUE, paged.print=TRUE}
-cars_orig %>% 
-  mutate(VehGas = as.factor(VehGas)) %>% 
-  dplyr::select(-IDpol, -where(is.factor)) %>% 
-  summary() %>% 
-  knitr::kable(format = "latex", booktabs = TRUE,
-               caption = "Summary of Variables in Data") %>%
+cars_orig %>%
+  mutate(VehGas = as.factor(VehGas)) %>%
+  dplyr::select(-IDpol, -where(is.factor)) %>%
+  summary() %>%
+  knitr::kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Summary of Variables in Data"
+  ) %>%
   kable_styling(latex_options = "scale_down") %>%
-  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
   kable_styling(latex_options = "striped")
 ```
 
 ## Data Analysis
 
 ```{r setup_fig, echo=FALSE}
-
 wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
 dsn <- file.path(wd, "data/input/shapefile")
 ```
@@ -600,8 +603,8 @@ par(mfrow = c(1, 1))
 cars_orig %>%
   mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
   mutate(VehGas = as.numeric(VehGas == "Diesel")) %>%
-  dplyr::select(-IDpol) %>% 
-  cor() %>% 
+  dplyr::select(-IDpol) %>%
+  cor() %>%
   heatmap(keep.dendro = FALSE)
 ```
 
@@ -610,26 +613,25 @@ cars_orig %>%
 </center>
 
 ```{r figBox, echo = FALSE, include = TRUE, fig.path = "data/figures/", fig.cap = "Boxplots of Numerical Variables", fig.subcap = c("ClaimNb", "VehPower", "VehAge", "DrivAge", "Exposure"), out.width="20%", fig.ncol=5}
-
-# 
+#
 # ggplot(cars_orig, aes(x = ClaimNb)) +
 #   geom_boxplot(fill = "blue", color = "black", notch = TRUE, notch_width = 0.2) +
 #   coord_flip()
-# 
+#
 # ggplot(cars_orig, aes(x = VehPower)) +
 #   geom_boxplot(fill = "green", color = "black", notch = TRUE, notchwidth = 0.2) +
 #   coord_flip()
-# 
+#
 # ggplot(cars_orig, aes(x = VehAge)) +
 #   geom_boxplot(fill = "red", color = "black") +
 #   stat_boxplot(geom='errorbar', width = 0.2) +
 #   coord_flip()
-# 
+#
 # ggplot(cars_orig, aes(x = DrivAge)) +
 #   geom_boxplot(fill = "orange", color = "black") +
 #   stat_boxplot(geom='errorbar') +
 #   coord_flip()
-# 
+#
 # ggplot(cars_orig, aes(x = Exposure)) +
 #   geom_boxplot(fill = "purple", color = "black") +
 #   stat_boxplot(geom='errorbar') +
@@ -640,25 +642,23 @@ boxplot(cars_orig$VehPower, col = "green")
 boxplot(cars_orig$VehAge, col = "red")
 boxplot(cars_orig$DrivAge, col = "orange")
 boxplot(cars_orig$Exposure, col = "purple")
-
 ```
 
 ```{r figHist, echo = FALSE, include = TRUE, fig.path = "data/figures/", fig.cap = "Histograms of Numerical Variables", fig.subcap = c("ClaimNb", "VehPower", "VehAge", "DrivAge", "Exposure"), out.width="20%", fig.ncol=5, out.height="100%"}
-
 ggplot(cars_orig, aes(x = ClaimNb)) +
-  geom_histogram(binwidth = 1, fill = "blue", color = "black") 
+  geom_histogram(binwidth = 1, fill = "blue", color = "black")
 
 ggplot(cars_orig, aes(x = VehPower)) +
-  geom_histogram(binwidth = 1, fill = "green", color = "black") 
+  geom_histogram(binwidth = 1, fill = "green", color = "black")
 
 ggplot(cars_orig, aes(x = VehAge)) +
-  geom_histogram(binwidth = 1, fill = "red", color = "black") 
+  geom_histogram(binwidth = 1, fill = "red", color = "black")
 
 ggplot(cars_orig, aes(x = DrivAge)) +
   geom_histogram(binwidth = 1, fill = "orange", color = "black")
 
 ggplot(cars_orig, aes(x = Exposure)) +
-  geom_histogram(binwidth = 1/12, fill = "purple", color = "black")
+  geom_histogram(binwidth = 1 / 12, fill = "purple", color = "black")
 ```
 
 \newpage
@@ -669,9 +669,9 @@ ggplot(cars_orig, aes(x = Exposure)) +
 
 ```{r glmSetup, include=TRUE, echo = FALSE}
 # Get dataframe and split
-cars_split <- cars_orig %>% 
-  dplyr::select(-IDpol) %>% 
-  dplyr::select(where(is.factor), everything()) %>% 
+cars_split <- cars_orig %>%
+  dplyr::select(-IDpol) %>%
+  dplyr::select(where(is.factor), everything()) %>%
   initial_split(prop = 0.8)
 train <- training(cars_split)
 test <- testing(cars_split)
@@ -680,7 +680,7 @@ test <- testing(cars_split)
 Using the basic stats \@[@stats-3] implementation of GLMs, one can fit a model with the following:
 
 ```{r glmFit, include  = TRUE, echo=TRUE}
-glm1 <- glm(ClaimNb ~ ., data = train, family = poisson(link=log), offset = Exposure)
+glm1 <- glm(ClaimNb ~ ., data = train, family = poisson(link = log), offset = Exposure)
 ```
 
 Yielding:
@@ -688,47 +688,45 @@ Yielding:
 ```{r glmSummaryCoef, include = TRUE, echo = FALSE}
 glmSum <- summary(glm1)
 
-summary(glm1)$coefficients %>% 
-  as_tibble() %>% 
+summary(glm1)$coefficients %>%
+  as_tibble() %>%
   mutate(
     " " = rownames(glmSum$coefficients),
     Significance = case_when(
-    `Pr(>|z|)` == 0 ~ "***",
-    `Pr(>|z|)` < 0.001 ~ "**",
-    `Pr(>|z|)` < 0.01 ~ "*",
-    `Pr(>|z|)` < 0.05 ~ ".",
-    .default = " "    
-  )) %>% 
-  relocate(" ", .before = everything()) %>% 
+      `Pr(>|z|)` == 0 ~ "***",
+      `Pr(>|z|)` < 0.001 ~ "**",
+      `Pr(>|z|)` < 0.01 ~ "*",
+      `Pr(>|z|)` < 0.05 ~ ".",
+      .default = " "
+    )
+  ) %>%
+  relocate(" ", .before = everything()) %>%
   kable(
     format = "latex", booktabs = TRUE,
     caption = "Coefficients of fitted GLM",
     row.names = TRUE
   ) %>%
-  kable_styling(latex_options = "HOLD_position") %>% 
-  kable_styling(latex_options = "striped") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
+  kable_styling(latex_options = "striped") %>%
   pack_rows(
     index = c(
       " " = 1,
-      "Area" = 5, 
-      "VehBrand" = 10, 
-      "Region" = 21, 
+      "Area" = 5,
+      "VehBrand" = 10,
+      "Region" = 21,
       "Numeric" = 7
     )
   )
-
-
 ```
 
 ```{r glmSumDetails, include = TRUE, echo = FALSE}
-
 cat(
-  "     Null Deviance:", glmSum$null.deviance,  "on", glmSum$df.null, "degrees of freedom\n",
+  "     Null Deviance:", glmSum$null.deviance, "on", glmSum$df.null, "degrees of freedom\n",
   "Residual Deviance:", glmSum$deviance, "on", glmSum$df.residual, "degrees of freedom\n",
   "AIC:", glmSum$aic,
   "\n\n",
   "Number of Fisher Scoring iterations", glmSum$iter
-  )
+)
 ```
 
 -   Where: “ClaimNb \~ .”: is the formula, signifying ClaimNb as the response variable and including all other variables as predictors
@@ -751,31 +749,32 @@ if (global_variables$source == TRUE) {
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 glmBackElimSum <- summary(backward_elimination)
 
-glmBackElimSum$coefficients %>% 
-  as_tibble() %>% 
+glmBackElimSum$coefficients %>%
+  as_tibble() %>%
   mutate(
     " " = rownames(glmBackElimSum$coefficients),
     Significance = case_when(
-    `Pr(>|z|)` == 0 ~ "***",
-    `Pr(>|z|)` < 0.001 ~ "**",
-    `Pr(>|z|)` < 0.01 ~ "*",
-    `Pr(>|z|)` < 0.05 ~ ".",
-    .default = " "    
-  )) %>% 
-  relocate(" ", .before = everything()) %>% 
+      `Pr(>|z|)` == 0 ~ "***",
+      `Pr(>|z|)` < 0.001 ~ "**",
+      `Pr(>|z|)` < 0.01 ~ "*",
+      `Pr(>|z|)` < 0.05 ~ ".",
+      .default = " "
+    )
+  ) %>%
+  relocate(" ", .before = everything()) %>%
   kable(
     format = "latex", booktabs = TRUE,
     caption = "Coefficients of GLM with backwards elimination",
     row.names = TRUE
   ) %>%
-  kable_styling(latex_options = "HOLD_position") %>% 
-  kable_styling(latex_options = "striped") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
+  kable_styling(latex_options = "striped") %>%
   pack_rows(
     index = c(
       " " = 1,
-      "Area" = 5, 
-      "VehBrand" = 10, 
-      "Region" = 21, 
+      "Area" = 5,
+      "VehBrand" = 10,
+      "Region" = 21,
       "Numeric" = 6
     )
   )
@@ -783,63 +782,64 @@ glmBackElimSum$coefficients %>%
 
 ```{r glmBackElimSumDetails, echo = FALSE, include = TRUE}
 cat(
-  "     Null Deviance:", glmBackElimSum$null.deviance,  "on", glmBackElimSum$df.null, "degrees of freedom\n",
+  "     Null Deviance:", glmBackElimSum$null.deviance, "on", glmBackElimSum$df.null, "degrees of freedom\n",
   "Residual Deviance:", glmBackElimSum$deviance, "on", glmBackElimSum$df.residual, "degrees of freedom\n",
   "AIC:", glmBackElimSum$aic,
   "\n\n",
   "Number of Fisher Scoring iterations", glmBackElimSum$iter
-  )
-
+)
 ```
 
 This is the familiar output of a the summary of a GLM, with the intercept, standard error and significance level of each predictor outlined. It can be seen that the categorical predictors have been split into dummy variables in the cases of Region, VehBrand, and Area. Metrics such as Deviance and AIC for the model as a whole can be seen underneath, alternatively we can evaluate performance with other metrics as seen below:
 
 ```{r glmMetrics, echo = FALSE, include=TRUE}
-predictions <- predict(glm1, newdata = test, type = "response") %>% 
-  as_tibble() %>% 
+predictions <- predict(glm1, newdata = test, type = "response") %>%
+  as_tibble() %>%
   mutate(index = seq(nrow(test)))
 
-val_data <- test %>% 
-  mutate(index = seq(nrow(test))) %>% 
+val_data <- test %>%
+  mutate(index = seq(nrow(test))) %>%
   left_join(predictions, join_by(index))
 
-yardstick::metrics(data = val_data, truth = ClaimNb, estimate = value) %>% 
-  knitr::kable(format = "latex", booktabs = TRUE,
-    caption = "Metrics of GLM Predictions on Validation Data") %>% 
-  kable_styling(latex_options = "HOLD_position") %>% 
-  kable_styling(latex_options = "striped") 
-
+yardstick::metrics(data = val_data, truth = ClaimNb, estimate = value) %>%
+  knitr::kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Metrics of GLM Predictions on Validation Data"
+  ) %>%
+  kable_styling(latex_options = "HOLD_position") %>%
+  kable_styling(latex_options = "striped")
 ```
 
 We can also look at a selection of predictions made from the resulting model:
 
 ```{r glmPredictions, include = TRUE, echo = FALSE, out.width = "100%", paged.print = TRUE}
-
-head(val_data) %>% 
-  dplyr::select(-index) %>% 
-  relocate(ClaimNb, .before = value) %>% 
-  mutate(Prediction = value) %>% 
-  kable(format = "latex", booktabs = TRUE,
-    caption = "Predictions from GLM on testing data") %>% 
-  kable_styling(latex_options = "scale_down") %>% 
-  kable_styling(latex_options = "striped") %>% 
+head(val_data) %>%
+  dplyr::select(-index) %>%
+  relocate(ClaimNb, .before = value) %>%
+  mutate(Prediction = value) %>%
+  kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Predictions from GLM on testing data"
+  ) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  kable_styling(latex_options = "striped") %>%
   kable_styling(latex_options = "HOLD_position") %>%
-  column_spec(11:12, bold  = TRUE) 
+  column_spec(11:12, bold = TRUE)
 ```
 
 ### Neural Networks
 
 ```{r nnSetup, include = TRUE, echo = FALSE}
 log_info("Preprocess data")
-df.n <- cars_orig %>% 
-  dplyr::select(where(is.numeric)) %>% 
+df.n <- cars_orig %>%
+  dplyr::select(where(is.numeric)) %>%
   mutate(across(c(where(is.numeric), -IDpol, -ClaimNb), ~ scale_col(.)))
 
-df <- cars_orig %>% 
-  mutate(ClaimNb = as.integer(ClaimNb)) %>% 
-  dplyr::select(c(IDpol, !where(is.numeric))) %>% 
-  mutate(VehGas = as.integer(VehGas == "Diesel")) %>% 
-  left_join(df.n, join_by(IDpol)) %>% 
+df <- cars_orig %>%
+  mutate(ClaimNb = as.integer(ClaimNb)) %>%
+  dplyr::select(c(IDpol, !where(is.numeric))) %>%
+  mutate(VehGas = as.integer(VehGas == "Diesel")) %>%
+  left_join(df.n, join_by(IDpol)) %>%
   dplyr::select(-IDpol)
 
 ## Create Recipe ---------------------------------------------------------------
@@ -853,11 +853,13 @@ baked_data <- bake(preprocessed_data, new_data = NULL)
 ## Split Data ------------------------------------------------------------------
 log_info("Test/train split")
 indices <- sample(1:nrow(df), 0.8 * nrow(df))
-train_data <- baked_data[indices, ] 
-test_data <- baked_data[-indices, ] 
+train_data <- baked_data[indices, ]
+test_data <- baked_data[-indices, ]
 
 x_train <- train_data %>% dplyr::select(-ClaimNb)
-x_test <- test_data %>% dplyr::select(-ClaimNb) %>% as.matrix()
+x_test <- test_data %>%
+  dplyr::select(-ClaimNb) %>%
+  as.matrix()
 
 y_train <- train_data$ClaimNb
 y_test <- test_data$ClaimNb
@@ -865,21 +867,22 @@ y_test <- test_data$ClaimNb
 
 ```{r nnTune, include = TRUE, echo = FALSE}
 # Define tuning grid
-t_batchsize <- c(512,1024)
-t_epochs <- c(30,50)
+t_batchsize <- c(512, 1024)
+t_epochs <- c(30, 50)
 t_act_final <- c("softplus", "exponential")
-t_lr <- c(0.01,0.001)
+t_lr <- c(0.01, 0.001)
 
-t_hidden_nodes <- c(16,32)
+t_hidden_nodes <- c(16, 32)
 t_hidden_act <- c("relu", "tanh")
 
 tune_grid <- expand.grid(
-  batchsize = t_batchsize, 
-  epochs = t_epochs, 
-  final_act  = t_act_final, 
+  batchsize = t_batchsize,
+  epochs = t_epochs,
+  final_act = t_act_final,
   learn_rate = t_lr,
   t_hidden_act1 = t_hidden_act, t_hidden_nodes1 = t_hidden_nodes,
-  t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes)
+  t_hidden_act2 = t_hidden_act, t_hidden_nodes2 = t_hidden_nodes
+)
 ```
 
 ```{r nnFit, echo = FALSE}
@@ -901,16 +904,19 @@ if (global_variables$source == TRUE) {
     nodes = c(best_fit$t_hidden_nodes1, best_fit$t_hidden_nodes2),
     batchsize = best_fit$batchsize,
     n_epochs = best_fit$epochs,
-    act_funs = c(best_fit$t_hidden_act1, 
-                 best_fit$t_hidden_act2, 
-                 best_fit$final_act),
+    act_funs = c(
+      best_fit$t_hidden_act1,
+      best_fit$t_hidden_act2,
+      best_fit$final_act
+    ),
     lr = best_fit$learn_rate,
-    verbose = 0)
+    verbose = 0
+  )
 }
 ```
 
 ```{r nnMetrics, include = TRUE, echo = FALSE}
-#Collect Metrics
+# Collect Metrics
 metrics.df <- data.frame(
   matrix(rep(numeric(256), 5),
     ncol = 5,
@@ -919,36 +925,38 @@ metrics.df <- data.frame(
       c("index", "loss", "mse", "val_loss", "val_mse")
     )
   )
-) %>% 
-  head() %>% 
+) %>%
+  head() %>%
   kable(
     format = "latex", booktabs = TRUE,
     caption = "Model Tuning Results",
     row.names = FALSE
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
-  kable_styling(latex_options = "HOLD_position") %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
   kable_styling(latex_options = "striped")
-  
 ```
 
 Below we can see the architecture of the neural network
 
 ```{r, nnFigNetwork, results='asis', echo=FALSE}
 cat(get_network_tex(
-    n_input = best_model$model$layers[[1]]$input_shape[[2]],
-    n_hidden1 = best_model$model$layers[[2]]$input_shape[[2]],
-    n_hidden2 = best_model$model$layers[[3]]$input_shape[[2]]))
+  n_input = best_model$model$layers[[1]]$input_shape[[2]],
+  n_hidden1 = best_model$model$layers[[2]]$input_shape[[2]],
+  n_hidden2 = best_model$model$layers[[3]]$input_shape[[2]]
+))
 ```
 
 Below we can see the computation graph of the neural network
 
 ```{r, nnCompGraph, results='asis', echo=FALSE}
 cat(get_computation_graph_tex(
-  act_funs = as.character(c(best_fit$t_hidden_act1,
-                            best_fit$t_hidden_act2,
-                            "exp"))))
-
+  act_funs = as.character(c(
+    best_fit$t_hidden_act1,
+    best_fit$t_hidden_act2,
+    "exp"
+  ))
+))
 ```
 
 ## Results

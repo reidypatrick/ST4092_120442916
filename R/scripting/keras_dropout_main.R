@@ -54,11 +54,11 @@ fit_dropout <- tune_keras_dropout(recipe, n_neurons, t_dropout, n_epochs)
 best_fit_dropout <- fit_best(fit_dropout)
 
 ## Extract predictions ---------------------------------------------------------
-predictions_dropout <- predict(best_fit_dropout, new_data = test_data) %>% 
+predictions_dropout <- predict(best_fit_dropout, new_data = test_data) %>%
   mutate(index = seq(nrow(test_data)))
 
-val_data_dropout <- test_data %>% 
-  mutate(index = seq(nrow(test_data))) %>% 
+val_data_dropout <- test_data %>%
+  mutate(index = seq(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
 
 

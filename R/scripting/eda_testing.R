@@ -74,21 +74,24 @@ print_plots(scatterplots)
 
 melt(cars)
 
-cars1<-cars %>% 
-  mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>% 
-  mutate(VehGas = as.numeric(VehGas == 'Diesel'))
+cars1 <- cars %>%
+  mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
+  mutate(VehGas = as.numeric(VehGas == "Diesel"))
 
 cor(cars1 %>% select(-IDpol)) %>% heatmap(keep.dendro = TRUE)
 
-ggplot(data = melt(cars), aes(x=ClaimNb, y=VehPower, fill=value)) + 
+ggplot(data = melt(cars), aes(x = ClaimNb, y = VehPower, fill = value)) +
   geom_tile()
 
-cars_orig %>% 
-  as_tibble() %>% 
-  dplyr::select(where(is.numeric), -IDpol) %>% 
+cars_orig %>%
+  as_tibble() %>%
+  dplyr::select(where(is.numeric), -IDpol) %>%
   pairs()
 
-cars_orig %>% dplyr::select(Region, Area, Density) %>% unique %>% arrange(Region, Area)
+cars_orig %>%
+  dplyr::select(Region, Area, Density) %>%
+  unique() %>%
+  arrange(Region, Area)
 
 plot(cars_cumsum$Exposure, cars_cumsum$accum)
 

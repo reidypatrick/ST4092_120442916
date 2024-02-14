@@ -1,6 +1,6 @@
 library(keras)
 library(tidyverse)
-#install_keras()
+# install_keras()
 
 # Load Dataset Mnist -----------------------------------------------------------
 mnist_orig <- dataset_mnist()
@@ -17,22 +17,22 @@ x_train <- array_reshape(x_train, c(nrow(x_train), 784))
 x_test <- array_reshape(x_test, c(nrow(x_test), 784))
 
 ## Rescale data ----------------------------------------------------------------
-x_train <- x_train/255
-x_test <- x_test/255
+x_train <- x_train / 255
+x_test <- x_test / 255
 
 y_train <- to_categorical(y_train, 10)
 y_test <- to_categorical(y_test, 10)
 
 # Defining the Model -----------------------------------------------------------
 model <- keras_model_sequential()
-model %>% 
-  layer_dense(units = 256, activation = "relu", input_shape = c(784)) %>% 
-  layer_dropout(rate = 0.04) %>% 
-  layer_dense(units = 128, activation = "relu") %>% 
-  layer_dropout(rate = 0.03) %>% 
-  layer_dense(units = 10, activation = "softmax") 
+model %>%
+  layer_dense(units = 256, activation = "relu", input_shape = c(784)) %>%
+  layer_dropout(rate = 0.04) %>%
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(rate = 0.03) %>%
+  layer_dense(units = 10, activation = "softmax")
 
-summary(model)  
+summary(model)
 
 ## Compile the model -----------------------------------------------------------
 model %>% compile(
@@ -44,7 +44,7 @@ model %>% compile(
 # Training and Evaluation ------------------------------------------------------
 history <- model %>% fit(
   x_train, y_train,
-  epochs = 30, 
+  epochs = 30,
   batch_size = 120,
   validation_split = 0.2
 )
@@ -53,4 +53,4 @@ plot(history)
 
 model %>% evaluate(x_test, y_test)
 
-model %>% predict(x_test) 
+model %>% predict(x_test)

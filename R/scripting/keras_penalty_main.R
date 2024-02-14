@@ -26,7 +26,7 @@ df <- cars_orig %>%
 
 n_boots <- 5
 n_epochs <- c(50)
-n_neurons <- c(16,32,64)
+n_neurons <- c(16, 32, 64)
 t_penalty <- c(0.01, 0.001, .05)
 
 # Model Building ---------------------------------------------------------------
@@ -55,12 +55,12 @@ fit_penalty <- tune_keras_penalty(recipe, n_neurons, t_penalty, n_epochs)
 best_fit_penalty <- fit_best(fit_penalty)
 
 ## Extract predictions ---------------------------------------------------------
-predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>% 
+predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>%
   mutate(index = seq(nrow(test_data)))
 
 
-val_data_penalty <- test_data %>% 
-  mutate(index = seq(nrow(test_data))) %>% 
+val_data_penalty <- test_data %>%
+  mutate(index = seq(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
 
 ## Calculate Metrics -----------------------------------------------------------

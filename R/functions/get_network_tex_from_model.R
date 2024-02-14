@@ -1,6 +1,6 @@
-get_network_tex_from_model <- function(model, 
-                                       margin = 0, 
-                                       h_scale = 1, 
+get_network_tex_from_model <- function(model,
+                                       margin = 0,
+                                       h_scale = 1,
                                        v_scale = 1) {
   c(get_network_tex(
     n_input = model$model$layers[[1]]$input_shape[[2]],

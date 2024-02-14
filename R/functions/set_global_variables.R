@@ -4,6 +4,8 @@ set_global_variables <- function(verbose = 1,
   # Undesirable for report knitting,
   # Desirable for testing and validation
 
-  global_variables <<- list(verbose = verbose,
-                            source = source)
+  global_variables <<- list(
+    verbose = verbose,
+    source = source
+  )
 }

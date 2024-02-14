@@ -6,17 +6,14 @@ source_functions <- function(py = FALSE) {
   for (f in seq_along(r_functions)) {
     source(file.path(r_functions_path, r_functions[f]))
   }
-  
+
   if (py) {
     # Source python functions
     py_functions_path <- file.path("python/functions")
     py_functions <- list.files(py_functions_path)
-    
+
     for (f in seq_along(py_functions)) {
       reticulate::source_python(file.path(py_functions_path, py_functions[f]))
     }
   }
 }
-
-
-   

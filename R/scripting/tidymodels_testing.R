@@ -53,7 +53,7 @@ grid_penalty <- expand.grid(
   hidden_units = c(64, 32),
   penalty = c(0.001, 0.01, 0.05),
   epochs = c(n_epochs),
-  activation = 'relu'
+  activation = "relu"
 )
 
 ### Define Model ---------------------------------------------------------------
@@ -64,8 +64,8 @@ nn_model_penalty <- mlp(
   epochs = tune(),
   activation = tune()
 ) %>%
-  set_engine('keras') %>%
-  set_mode('regression')
+  set_engine("keras") %>%
+  set_mode("regression")
 
 ### Define Workflow ------------------------------------------------------------
 
@@ -78,8 +78,10 @@ fit_penalty <- workflow_penalty %>%
   tune_grid(
     resamples = bootstraps(train_data, times = n_boots),
     grid = grid_penalty,
-    control = control_grid(save_pred = TRUE,
-                           save_workflow = TRUE)
+    control = control_grid(
+      save_pred = TRUE,
+      save_workflow = TRUE
+    )
   )
 
 save.image(file = ".Rdata")
@@ -92,7 +94,7 @@ grid_dropout <- expand.grid(
   hidden_units = c(32, 64),
   dropout = c(0.2, 0.3, 0.4),
   epochs = c(n_epochs),
-  activation = 'relu'
+  activation = "relu"
 )
 
 ### Define Model ---------------------------------------------------------------
@@ -102,8 +104,8 @@ nn_model_dropout <- mlp(
   epochs = tune(),
   activation = tune()
 ) %>%
-  set_engine('keras') %>%
-  set_mode('regression')
+  set_engine("keras") %>%
+  set_mode("regression")
 
 ### Define Workflow ------------------------------------------------------------
 workflow_dropout <- workflow() %>%
@@ -115,8 +117,10 @@ fit_dropout <- workflow_dropout %>%
   tune_grid(
     resamples = bootstraps(train_data, times = n_boots),
     grid = grid_dropout,
-    control = control_grid(save_pred = TRUE,
-                           save_workflow = TRUE)
+    control = control_grid(
+      save_pred = TRUE,
+      save_workflow = TRUE
+    )
   )
 
 
@@ -128,18 +132,18 @@ best_fit_dropout <- fit_best(fit_dropout)
 best_fit_penalty <- fit_best(fit_penalty)
 
 ## Extract predictions ---------------------------------------------------------
-predictions_dropout <- predict(best_fit_dropout, new_data = test_data) %>% 
+predictions_dropout <- predict(best_fit_dropout, new_data = test_data) %>%
   mutate(index = seq(nrow(test_data)))
 
-predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>% 
+predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>%
   mutate(index = seq(nrow(test_data)))
 
-val_data_dropout <- test_data %>% 
-  mutate(index = seq(nrow(test_data))) %>% 
+val_data_dropout <- test_data %>%
+  mutate(index = seq(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
 
-val_data_penalty <- test_data %>% 
-  mutate(index = seq(nrow(test_data))) %>% 
+val_data_penalty <- test_data %>%
+  mutate(index = seq(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
 
 ## Calculate Metrics -----------------------------------------------------------

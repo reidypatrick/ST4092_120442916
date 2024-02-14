@@ -9,7 +9,7 @@ fit_keras_poisson <- function(
     m = c("mean_squared_error"),
     verbose = 1) {
   # Function for fitting two layer keras FFNN, with options for tuning
-  
+
   # log system time
   start <- Sys.time()
   # Save and print parameters
@@ -53,7 +53,9 @@ fit_keras_poisson <- function(
     )
   params <- append(params, Sys.time() - start)
 
-  if (verbose == 1) {log_info("Done")}
-  
+  if (verbose == 1) {
+    log_info("Done")
+  }
+
   list(model = model, history = history, params = params)
 }

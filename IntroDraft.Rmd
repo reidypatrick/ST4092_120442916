@@ -39,9 +39,11 @@ csl: https://www.zotero.org/styles/ieee
 ---
 
 ```{r setup, echo=FALSE, include=TRUE}
-knitr::opts_chunk$set(echo = FALSE,
-                      include = TRUE,
-                      fig.path = "data/figures")
+knitr::opts_chunk$set(
+  echo = FALSE,
+  include = TRUE,
+  fig.path = "data/figures"
+)
 source("R/functions/source_functions.R")
 source_functions()
 ```
@@ -70,7 +72,8 @@ set.seed(123)
 
 # Generate nearly linear data
 x <- 1:25
-y_true <- 2 * x + rnorm(25, mean = 0, sd = 5)  # True linear relationship with normally distributed error
+y_true <- 2 * x + rnorm(25, mean = 0, sd = 5)
+# True linear relationship with normally distributed error
 
 # Fit linear model
 model <- lm(y_true ~ x)
@@ -79,16 +82,31 @@ model <- lm(y_true ~ x)
 y_pred <- predict(model)
 
 # Plot the data and linear model
-plot(x, y_true, col = "blue", pch = 20, main = "Linear Model: LSE", xlab = "X", ylab = "Y")
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  main = "Linear Model: LSE",
+  xlab = "X",
+  ylab = "Y"
+)
 abline(model, col = "red")
 
 # Add lines indicating normally distributed errors
 segments(x, y_true, x, y_pred, col = "green")
 
 # Add legend
-legend("topleft", legend = c(expression(y[i]), expression(y[i] - hat(y)[i]), expression(hat(Y) == beta[0] + beta[1]*X)), 
-       col = c("blue", "green", "red"), pch = c(20, NA, NA), lty = c(NA, 1, 1), cex = 0.8)
-
+legend("topleft",
+  legend = c(
+    expression(y[i]), expression(y[i] - hat(y)[i]),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
 ```
 
 Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also included are the green lines, which represent the difference between the prediction and the true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate (LSE) of our regression parameters $\beta_0$, $\beta_1$:
@@ -132,7 +150,8 @@ set.seed(123)
 
 # Generate nearly linear data
 x <- 1:25
-y_true <- 2 * x + rnorm(25, mean = 0, sd = 3)  # True linear relationship with normally distributed error
+y_true <- 2 * x + rnorm(25, mean = 0, sd = 3)
+# True linear relationship with normally distributed error
 
 # Fit linear model
 model <- lm(y_true ~ x)
@@ -141,18 +160,39 @@ model <- lm(y_true ~ x)
 y_pred <- predict(model)
 
 # Plot the data and linear model
-plot(x, y_true, col = "blue", pch = 20, main = "Linear Model: MLE", xlab = "X", ylab = "Y")
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  main = "Linear Model: MLE",
+  xlab = "X",
+  ylab = "Y"
+)
 abline(model, col = "red")
 
-# Add bell curves around each true data point to represent normally distributed errors
-for (i in seq(1,25,5)) {
+# Add bell curves around each true data
+# point to represent normally distributed errors
+for (i in seq(1, 25, 5)) {
   points <- rnorm(100, mean = y_pred[i], sd = 1.5)
   d <- density(points)
   lines(i + d$y, d$x, col = "green", lwd = 2)
 }
 
-legend("topleft", legend = c(expression(y[i]), expression(paste("f(y"[i], " | y"[i], " ~ N(", u[i], ", ", sigma^2, "))")), expression(hat(Y) == beta[0] + beta[1]*X)), 
-       col = c("blue", "green", "red"), pch = c(20, NA, NA), lty = c(NA, 1, 1), cex = 0.8)
+legend(
+  "topleft",
+  legend = c(
+    expression(y[i]),
+    expression(
+      paste("f(y"[i], " | y"[i], " ~ N(", u[i], ", ", sigma^2, "))")
+    ),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
 ```
 
 Above is a representation of these assumptions, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
@@ -273,7 +313,8 @@ With the combined notions of the MLE and the EDF, we can generalise this process
 ```{r figGLMMLE}
 set.seed(09022024)
 x <- 1:25
-y_true <- x * rexp(25, rate = 1)  # True linear relationship with normally distributed error
+y_true <- x * rexp(25, rate = 1)
+# True linear relationship with normally distributed error
 
 # Fit linear model
 model <- lm(y_true ~ x)
@@ -283,17 +324,36 @@ y_pred <- predict(model)
 
 
 # Plot the data and linear model
-plot(x, y_true, col = "blue", pch = 20, main = "Generalised Linear Model", xlab = "X", ylab = "Y", ylim = c(0,85))
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  main = "Generalised Linear Model",
+  xlab = "X",
+  ylab = "Y",
+  ylim = c(0, 85)
+)
 abline(model, col = "red")
- 
-for (i in seq(2,25,4)) {
+
+for (i in seq(2, 25, 4)) {
   points <- rexp(10000, rate = 0.5)
   d <- density(points)
   lines(i + d$y, y_true[i] + d$x, col = "green", lwd = 2)
 }
 
-legend("topleft", legend = c(expression(y[i]), expression(paste("f(y"[i], ")")), expression(hat(Y) == beta[0] + beta[1]*X)), 
-       col = c("blue", "green", "red"), pch = c(20, NA, NA), lty = c(NA, 1, 1), cex = 0.8)
+legend(
+  "topleft",
+  legend = c(
+    expression(y[i]),
+    expression(paste("f(y"[i], ")")),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
 ```
 
 Here we see that our $y_is$ are clearly not distributed normally, rather by some other distribution $f(y_i)$ illustrated by the green densities, and as such any linear predictor, such as is shown in red, will not accurately model our data.

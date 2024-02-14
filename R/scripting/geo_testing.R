@@ -27,8 +27,10 @@ reg_dict <- read_csv("data/input/regions_FR.csv", col_names = FALSE) %>%
     str = region_name,
     id = "Latin-ASCII"
   )) %>%
-  mutate(region_name = 
-           ifelse(startsWith(region_name, "CENTRE"), "CENTRE", region_name))
+  mutate(
+    region_name =
+      ifelse(startsWith(region_name, "CENTRE"), "CENTRE", region_name)
+  )
 
 
 # ggplot and shapefile testing ----
@@ -54,9 +56,11 @@ map_obj <- shape_copy@data %>%
 claim_map <- sf::st_as_sf(shape_copy)
 
 ggplot() +
-  geom_polygon(data = map_obj, 
-               aes(x = long, y = lat, group = group, fill = ClaimNb), 
-               color = "white") +
+  geom_polygon(
+    data = map_obj,
+    aes(x = long, y = lat, group = group, fill = ClaimNb),
+    color = "white"
+  ) +
   scale_fill_continuous(
     name = "Number of Claims",
     low = "lightblue", high = 6
@@ -64,9 +68,11 @@ ggplot() +
   theme_void()
 
 ggplot() +
-  geom_polygon(data = map_obj, 
-               aes(x = long, y = lat, group = group, fill = ClaimNb), 
-               color = "black") +
+  geom_polygon(
+    data = map_obj,
+    aes(x = long, y = lat, group = group, fill = ClaimNb),
+    color = "black"
+  ) +
   theme_void()
 
 coeffs <- glm1$coefficients
