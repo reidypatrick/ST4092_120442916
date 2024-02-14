@@ -68,13 +68,13 @@ for (i in seq(4,20,4)) {
   lines(i + d$y, y_pred[i] + d$x, col = "green", lwd = 2)
 }
 
-# # Set seed for reproducibility
-# set.seed(123)
-# 
-# # Number of random variables
-# n <- 1000
-# 
-# # Generate exponential random variables
+# Set seed for reproducibility
+set.seed(123)
+
+# Number of random variables
+n <- 1000
+
+# Generate poisson random variables
 # exp_values <- rexp(n, rate = 1)  # rate = 1 (lambda = 1) for exponential distribution
 # 
 # # Plot histogram
@@ -82,3 +82,28 @@ for (i in seq(4,20,4)) {
 # 
 # # Overlay the density curve
 # curve(dexp(x, rate = 1), col = "red", lwd = 2, add = TRUE, n = 1000, from = 0, to = max(exp_values))
+
+
+set.seed(123)
+
+# Generate nearly linear data
+x <- 1:25
+lambda <- exp(x)  # True lambda values for Poisson distribution
+y_true <- rpois(25, lambda)  # True linear relationship with Poisson-distributed error
+
+# Fit linear model
+model <- lm(y_true ~ x)
+
+# Predictions from the model
+y_pred <- predict(model)
+
+# Plot the data and linear model
+plot(x, y_true, col = "blue", pch = 20, main = "Linear Model: MLE", xlab = "X", ylab = "Y")
+abline(model, col = "red")
+
+# Add Poisson curves around each true data point
+for (i in seq_along(x)) {
+  points <- rpois(100, lambda[i])
+  d <- density(points)
+  lines(i + d$y, d$x, col = "green", lwd = 2)
+}
