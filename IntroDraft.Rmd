@@ -48,6 +48,16 @@ source("R/functions/source_functions.R")
 source_functions()
 ```
 
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
+\tableoffigures
+
+\pagebreak
+
 # Simple Linear Regression
 
 ## Least Squares Estimate
