@@ -38,7 +38,7 @@ recipe <- recipe(ClaimNb ~ ., data = df) %>%
 
 ## Split Data ------------------------------------------------------------------
 set.seed(42)
-indices <- sample(1:nrow(df), 0.8 * nrow(df))
+indices <- sample(seq_len(nrow(df)), 0.8 * nrow(df))
 train_data <- df[indices, ]
 test_data <- df[-indices, ]
 
@@ -56,11 +56,11 @@ best_fit_penalty <- fit_best(fit_penalty)
 
 ## Extract predictions ---------------------------------------------------------
 predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>%
-  mutate(index = seq(nrow(test_data)))
+  mutate(index = seq_len(nrow(test_data)))
 
 
 val_data_penalty <- test_data %>%
-  mutate(index = seq(nrow(test_data))) %>%
+  mutate(index = seq_len(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
 
 ## Calculate Metrics -----------------------------------------------------------

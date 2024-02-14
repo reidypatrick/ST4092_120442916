@@ -1,4 +1,9 @@
-tune_keras_penalty <- function(recipe, n_neurons, .penalty, n_epochs) {
+tune_keras_penalty <- function(
+    recipe,
+    n_neurons,
+    .penalty,
+    n_epochs,
+    n_boots) {
   #' trains and tunes keras neural networks.
   #'
   #' @description
@@ -40,4 +45,6 @@ tune_keras_penalty <- function(recipe, n_neurons, .penalty, n_epochs) {
         save_workflow = TRUE
       )
     )
+
+  fit_penalty
 }

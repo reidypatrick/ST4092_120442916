@@ -12,7 +12,7 @@ data <- OpenML::getOMLDataSet(data.id = 41214)
 
 # Preprocess the data ----------------------------------------------------------
 log_info("Preprocess data")
-df.n <- data$data %>%
+df_n <- data$data %>%
   dplyr::select(where(is.numeric)) %>%
   mutate(across(c(where(is.numeric), -IDpol, -ClaimNb), ~ scale_col(.)))
 
@@ -20,7 +20,7 @@ df <- data$data %>%
   mutate(ClaimNb = as.integer(ClaimNb)) %>%
   dplyr::select(c(IDpol, !where(is.numeric))) %>%
   mutate(VehGas = as.integer(VehGas == "Diesel")) %>%
-  left_join(df.n, join_by(IDpol)) %>%
+  left_join(df_n, join_by(IDpol)) %>%
   dplyr::select(-IDpol)
 
 ## Create Recipe ---------------------------------------------------------------
@@ -33,7 +33,7 @@ baked_data <- bake(preprocessed_data, new_data = NULL)
 
 ## Split Data ------------------------------------------------------------------
 log_info("Test/train split")
-indices <- sample(1:nrow(df), 0.8 * nrow(df))
+indices <- sample(seq_len(nrow(df)), 0.8 * nrow(df))
 train_data <- baked_data[indices, ]
 test_data <- baked_data[-indices, ]
 

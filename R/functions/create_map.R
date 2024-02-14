@@ -1,3 +1,4 @@
+# nolint start
 create_map <- function(.data = cars_orig, .col, .shape = shape) {
   # Defaults to using cars_orig and france shapefile
   # also defaults to summarising by the sum of specified column
@@ -27,3 +28,4 @@ create_map <- function(.data = cars_orig, .col, .shape = shape) {
     scale_fill_gradient(name = substitute(.col), labels = "comma") +
     theme_void()
 }
+# nolint end

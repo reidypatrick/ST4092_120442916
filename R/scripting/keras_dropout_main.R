@@ -37,7 +37,7 @@ recipe <- recipe(ClaimNb ~ ., data = df) %>%
 
 ## Split Data ------------------------------------------------------------------
 set.seed(42)
-indices <- sample(1:nrow(df), 0.8 * nrow(df))
+indices <- sample(seq_len(nrow(df)), 0.8 * nrow(df))
 train_data <- df[indices, ]
 test_data <- df[-indices, ]
 
@@ -55,10 +55,10 @@ best_fit_dropout <- fit_best(fit_dropout)
 
 ## Extract predictions ---------------------------------------------------------
 predictions_dropout <- predict(best_fit_dropout, new_data = test_data) %>%
-  mutate(index = seq(nrow(test_data)))
+  mutate(index = row_number())
 
 val_data_dropout <- test_data %>%
-  mutate(index = seq(nrow(test_data))) %>%
+  mutate(index = row_number()) %>%
   right_join(predictions_dropout, join_by(index))
 
 

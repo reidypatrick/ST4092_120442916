@@ -613,30 +613,6 @@ cars_orig %>%
 </center>
 
 ```{r figBox, echo = FALSE, include = TRUE, fig.path = "data/figures/", fig.cap = "Boxplots of Numerical Variables", fig.subcap = c("ClaimNb", "VehPower", "VehAge", "DrivAge", "Exposure"), out.width="20%", fig.ncol=5}
-#
-# ggplot(cars_orig, aes(x = ClaimNb)) +
-#   geom_boxplot(fill = "blue", color = "black", notch = TRUE, notch_width = 0.2) +
-#   coord_flip()
-#
-# ggplot(cars_orig, aes(x = VehPower)) +
-#   geom_boxplot(fill = "green", color = "black", notch = TRUE, notchwidth = 0.2) +
-#   coord_flip()
-#
-# ggplot(cars_orig, aes(x = VehAge)) +
-#   geom_boxplot(fill = "red", color = "black") +
-#   stat_boxplot(geom='errorbar', width = 0.2) +
-#   coord_flip()
-#
-# ggplot(cars_orig, aes(x = DrivAge)) +
-#   geom_boxplot(fill = "orange", color = "black") +
-#   stat_boxplot(geom='errorbar') +
-#   coord_flip()
-#
-# ggplot(cars_orig, aes(x = Exposure)) +
-#   geom_boxplot(fill = "purple", color = "black") +
-#   stat_boxplot(geom='errorbar') +
-#   coord_flip()
-
 boxplot(cars_orig$ClaimNb, col = "blue")
 boxplot(cars_orig$VehPower, col = "green")
 boxplot(cars_orig$VehAge, col = "red")
@@ -680,18 +656,19 @@ test <- testing(cars_split)
 Using the basic stats \@[@stats-3] implementation of GLMs, one can fit a model with the following:
 
 ```{r glmFit, include  = TRUE, echo=TRUE}
-glm1 <- glm(ClaimNb ~ ., data = train, family = poisson(link = log), offset = Exposure)
+glm1 <- glm(ClaimNb ~ .,
+            data = train,
+            family = poisson(link = log),
+            offset = Exposure)
 ```
 
 Yielding:
 
 ```{r glmSummaryCoef, include = TRUE, echo = FALSE}
-glmSum <- summary(glm1)
-
 summary(glm1)$coefficients %>%
   as_tibble() %>%
   mutate(
-    " " = rownames(glmSum$coefficients),
+    " " = rownames(summary(glm1)$coefficients),
     Significance = case_when(
       `Pr(>|z|)` == 0 ~ "***",
       `Pr(>|z|)` < 0.001 ~ "**",
@@ -721,11 +698,13 @@ summary(glm1)$coefficients %>%
 
 ```{r glmSumDetails, include = TRUE, echo = FALSE}
 cat(
-  "     Null Deviance:", glmSum$null.deviance, "on", glmSum$df.null, "degrees of freedom\n",
-  "Residual Deviance:", glmSum$deviance, "on", glmSum$df.residual, "degrees of freedom\n",
-  "AIC:", glmSum$aic,
+  "     Null Deviance:", summary(glm1)$null.deviance, "on",
+  summary(glm1)$df.null, "degrees of freedom\n",
+  "Residual Deviance:", summary(glm1)$deviance, "on",
+  summary(glm1)$df.residual, "degrees of freedom\n",
+  "AIC:", summary(glm1)$aic,
   "\n\n",
-  "Number of Fisher Scoring iterations", glmSum$iter
+  "Number of Fisher Scoring iterations", summary(glm1)$iter
 )
 ```
 
@@ -747,12 +726,10 @@ if (global_variables$source == TRUE) {
 
 ```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-glmBackElimSum <- summary(backward_elimination)
-
-glmBackElimSum$coefficients %>%
+summary(backward_elimination)$coefficients %>%
   as_tibble() %>%
   mutate(
-    " " = rownames(glmBackElimSum$coefficients),
+    " " = rownames(summary(backward_elimination)$coefficients),
     Significance = case_when(
       `Pr(>|z|)` == 0 ~ "***",
       `Pr(>|z|)` < 0.001 ~ "**",
@@ -780,13 +757,15 @@ glmBackElimSum$coefficients %>%
   )
 ```
 
-```{r glmBackElimSumDetails, echo = FALSE, include = TRUE}
+```{r summary(backward_elimination)Details, echo = FALSE, include = TRUE}
 cat(
-  "     Null Deviance:", glmBackElimSum$null.deviance, "on", glmBackElimSum$df.null, "degrees of freedom\n",
-  "Residual Deviance:", glmBackElimSum$deviance, "on", glmBackElimSum$df.residual, "degrees of freedom\n",
-  "AIC:", glmBackElimSum$aic,
+  "     Null Deviance:", summary(backward_elimination)$null.deviance, "on",
+  summary(backward_elimination)$df.null, "degrees of freedom\n",
+  "Residual Deviance:", summary(backward_elimination)$deviance, "on",
+  summary(backward_elimination)$df.residual, "degrees of freedom\n",
+  "AIC:", summary(backward_elimination)$aic,
   "\n\n",
-  "Number of Fisher Scoring iterations", glmBackElimSum$iter
+  "Number of Fisher Scoring iterations", summary(backward_elimination)$iter
 )
 ```
 
@@ -795,10 +774,10 @@ This is the familiar output of a the summary of a GLM, with the intercept, stand
 ```{r glmMetrics, echo = FALSE, include=TRUE}
 predictions <- predict(glm1, newdata = test, type = "response") %>%
   as_tibble() %>%
-  mutate(index = seq(nrow(test)))
+  mutate(index = row_number())
 
 val_data <- test %>%
-  mutate(index = seq(nrow(test))) %>%
+  mutate(index = row_number()) %>%
   left_join(predictions, join_by(index))
 
 yardstick::metrics(data = val_data, truth = ClaimNb, estimate = value) %>%
@@ -831,7 +810,7 @@ head(val_data) %>%
 
 ```{r nnSetup, include = TRUE, echo = FALSE}
 log_info("Preprocess data")
-df.n <- cars_orig %>%
+df_n <- cars_orig %>%
   dplyr::select(where(is.numeric)) %>%
   mutate(across(c(where(is.numeric), -IDpol, -ClaimNb), ~ scale_col(.)))
 
@@ -839,7 +818,7 @@ df <- cars_orig %>%
   mutate(ClaimNb = as.integer(ClaimNb)) %>%
   dplyr::select(c(IDpol, !where(is.numeric))) %>%
   mutate(VehGas = as.integer(VehGas == "Diesel")) %>%
-  left_join(df.n, join_by(IDpol)) %>%
+  left_join(df_n, join_by(IDpol)) %>%
   dplyr::select(-IDpol)
 
 ## Create Recipe ---------------------------------------------------------------
@@ -852,7 +831,7 @@ baked_data <- bake(preprocessed_data, new_data = NULL)
 
 ## Split Data ------------------------------------------------------------------
 log_info("Test/train split")
-indices <- sample(1:nrow(df), 0.8 * nrow(df))
+indices <- sample(seq_len(nrow(df)), 0.8 * nrow(df))
 train_data <- baked_data[indices, ]
 test_data <- baked_data[-indices, ]
 
@@ -917,7 +896,7 @@ if (global_variables$source == TRUE) {
 
 ```{r nnMetrics, include = TRUE, echo = FALSE}
 # Collect Metrics
-metrics.df <- data.frame(
+metrics_df <- data.frame(
   matrix(rep(numeric(256), 5),
     ncol = 5,
     dimnames = list(

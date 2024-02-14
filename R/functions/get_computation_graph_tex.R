@@ -6,7 +6,8 @@ get_computation_graph_tex <- function(margin = 0,
     "
   \\begin{figure}
     \\centering
-      \\begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
+      \\begin{tikzpicture}[>=stealth, node distance=1.5cm,",
+    "every node/.style={scale=0.8}]
       % Input layer
       \\node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
       \\node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
@@ -15,7 +16,8 @@ get_computation_graph_tex <- function(margin = 0,
       \\node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
       \\node[circle, draw, fill=green!20] (plus1) at (2,-1) {$+$};
 
-      \\node[circle, draw, fill=red!20] (act_fun1) at (3,-1) {$", act_funs[1], "$};
+      \\node[circle, draw, fill=red!20] (act_fun1) at (3,-1) {$",
+    act_funs[1], "$};
 
       % Labels
       \\node[above=0.5cm of X] {Input Layer};
@@ -36,7 +38,8 @@ get_computation_graph_tex <- function(margin = 0,
       \\node[circle, draw, fill=green!20] (star2) at (4,-1) {$*$};
       \\node[circle, draw, fill=green!20] (plus2) at (5,-1) {$+$};
 
-      \\node[circle, draw, fill=red!20] (act_fun2) at (6,-1) {$", act_funs[2], "$};
+      \\node[circle, draw, fill=red!20] (act_fun2) at (6,-1) {$",
+    act_funs[2], "$};
 
       % Labels
       \\node[above=0.5cm of act_fun1] {Hidden Layer 1};
@@ -57,7 +60,8 @@ get_computation_graph_tex <- function(margin = 0,
       \\node[circle, draw, fill=green!20] (star3) at (7,-1) {$*$};
       \\node[circle, draw, fill=green!20] (plus3) at (8,-1) {$+$};
 
-      \\node[circle, draw, fill=red!20] (act_fun3) at (9,-1) {$", act_funs[3], "$};
+      \\node[circle, draw, fill=red!20] (act_fun3) at (9,-1) {$",
+    act_funs[3], "$};
 
       % Labels
       \\node[above=0.5cm of act_fun2] {Hidden Layer 1};

@@ -31,8 +31,12 @@ fit_keras_poisson <- function(
       units = nodes[1], activation = act_funs[1], name = "Hidden1",
       input_shape = ncol(x_train)
     ) %>%
-    layer_dense(units = nodes[2], activation = act_funs[2], name = "Hidden2") %>%
-    layer_dense(units = 1, activation = act_funs[3], name = "Output")
+    layer_dense(
+      units = nodes[2], activation = act_funs[2], name = "Hidden2"
+    ) %>%
+    layer_dense(
+      units = 1, activation = act_funs[3], name = "Output"
+    )
 
   # Define model loss and optimiser
   model %>% compile(

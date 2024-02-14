@@ -1,5 +1,5 @@
 get_best_fit <- function(model_list, tune_grid) {
-  metrics.df <- data.frame(
+  metrics_df <- data.frame(
     matrix(rep(numeric(length(model_list)), 5),
       ncol = 5,
       dimnames = list(
@@ -10,9 +10,14 @@ get_best_fit <- function(model_list, tune_grid) {
   )
 
 
-  for (i in seq_len(nrow(metrics.df))) {
-    metrics.df[i, ] <- c(i, unlist(lapply(model_list[[i]]$history$metrics, tail, 1)))
+  for (i in seq_len(nrow(metrics_df))) {
+    metrics_df[i, ] <- c(
+      i,
+      unlist(
+        lapply(model_list[[i]]$history$metrics, tail, 1)
+      )
+    )
   }
 
-  tune_grid[metrics.df[which.min(metrics.df$mse), ]$index, ]
+  tune_grid[metrics_df[which.min(metrics_df$mse), ]$index, ]
 }
