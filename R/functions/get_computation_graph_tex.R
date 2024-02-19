@@ -1,7 +1,8 @@
 get_computation_graph_tex <- function(margin = 0,
                                       h_scale = 1,
                                       v_scale = 1,
-                                      act_funs = c("ReLU", "ReLU", "Exp")) {
+                                      act_funs = c("ReLU", "ReLU", "Exp"),
+                                      name) {
   c(
     "
   \\begin{figure}
@@ -90,7 +91,7 @@ get_computation_graph_tex <- function(margin = 0,
 
     \\end{tikzpicture}
     \\caption{Computation Graph of Neural Network}
-    \\label{fig:neural_network_computation_graph}
+    \\label{fig:", name, "}
   \\end{figure}"
   )
 }
