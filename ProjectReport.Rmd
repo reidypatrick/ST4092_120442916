@@ -13,6 +13,7 @@ output:
   bookdown::pdf_document2:
     fig_crop: no
     keep_tex: FALSE
+    toc: FALSE
     extra_dependencies: ["subfig", "tikz"]
   author:
   - name: "Patrick Reidy"
@@ -50,21 +51,31 @@ library(knitr)
 library(kableExtra)
 library(keras)
 
-source("R/functions/source_functions.R")
+source("R/functions/source_functions.R", verbose = FALSE)
 source_functions()
-set_global_variables(
-  verbose = 0,
-  source = TRUE
-)
+
+# config
+options(log_verbose = TRUE)
+options(source_or_run = "object")
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
 
 \newpage
 
+\tableofcontents
+
+\newpage
+
 \listoffigures
 
+\newpage
+
 \listoftables
+
+\newpage
+
+# Glossary {.unnumbered}
 
 # Abstract
 
@@ -273,7 +284,7 @@ $$
     \times \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
     = H_2
 \Rightarrow
-    exp(H_2)
+    \exp(H_2)
     = \hat{Y}
 $$
 
@@ -461,7 +472,10 @@ Where:
 This form only applies to the input layer of the model, as the resultant value(s) would then be fed into a "hidden" layer, where this procedure $WX+b \Rightarrow ActivationFunction$ is again applied, except X is now the output of the previous layer. As may already be clear, it can become quite cumbersome to notate this process, and so NNs are often visualised with computation graphs, one of which for a NN with a typical structure can be seen below:
 
 ```{r, figDummyCompGraph, results="asis", echo=FALSE}
-cat(get_computation_graph_tex(act_funs = c("", "", "")))
+cat(get_computation_graph_tex(
+  act_funs = c("", "", ""),
+  name = "figDummyCompGraph"
+))
 ```
 
 Where:
@@ -716,7 +730,11 @@ cat(
 
 Alternatively for more robust feature selection one can use backwards elimination
 
-```{r glmBackElim, include = TRUE, echo = TRUE}
+```{r glmBackElimEcho, include = FALSE, echo = TRUE}
+
+```
+
+```{r glmBackElim, include = TRUE, echo = FALSE}
 if (global_variables$source == TRUE) {
   backward_elimination <- get_backward_elimination("object")
 } else {
@@ -888,8 +906,7 @@ if (global_variables$source == TRUE) {
       best_fit$t_hidden_act2,
       best_fit$final_act
     ),
-    lr = best_fit$learn_rate,
-    verbose = 0
+    lr = best_fit$learn_rate
   )
 }
 ```
@@ -920,16 +937,16 @@ Below we can see the architecture of the neural network
 
 ```{r, nnFigNetwork, results='asis', echo=FALSE}
 cat(get_network_tex(
-  n_input = best_model$model$layers[[1]]$input_shape[[2]],
-  n_hidden1 = best_model$model$layers[[2]]$input_shape[[2]],
-  n_hidden2 = best_model$model$layers[[3]]$input_shape[[2]]
+  n_input = best_model$params$shape[1],
+  n_hidden1 = best_model$params$shape[2],
+  n_hidden2 = best_model$params$shape[3]
 ))
 ```
 
 Below we can see the computation graph of the neural network
 
 ```{r, nnCompGraph, results='asis', echo=FALSE}
-cat(get_computation_graph_tex(
+cat(get_computation_graph_tex(name = "nnCompGraph",
   act_funs = as.character(c(
     best_fit$t_hidden_act1,
     best_fit$t_hidden_act2,
