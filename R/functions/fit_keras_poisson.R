@@ -7,7 +7,7 @@ fit_keras_poisson <- function(
     act_funs = c("relu", "relu", "exponential"),
     lr = 0.001,
     m = c("mean_squared_error"),
-    verbose = 1) {
+    verbose = getOption("log_verbose")) {
   # Function for fitting two layer keras FFNN, with options for tuning
 
   # log system time
@@ -20,8 +20,10 @@ fit_keras_poisson <- function(
     lr = lr,
     m = m
   )
-  if (verbose == 1) {
-    log_info("Start Model Training")
+  
+  log_info("Start Model Training")
+  
+  if (verbose == TRUE) {
     print(params)
   }
   # Construct model architecture
@@ -55,11 +57,22 @@ fit_keras_poisson <- function(
       validation_split = 0.2,
       verbose = verbose
     )
-  params <- append(params, Sys.time() - start)
+  
+  more_params <- list(
+    time = Sys.time() - start,
+    shape = c(
+      model$layers[[1]]$input_shape[[2]],
+      model$layers[[2]]$input_shape[[2]],
+      model$layers[[3]]$input_shape[[2]]
+    )
+  )
+  
+  params <- append(
+    params,
+    more_params
+  )
 
-  if (verbose == 1) {
-    log_info("Done")
-  }
+  log_info("Done")
 
   list(model = model, history = history, params = params)
 }
