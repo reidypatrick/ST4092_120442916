@@ -1,4 +1,6 @@
-log_info <- function(message = "", verbose = get_global_variables(source)) {
+log_info <- function(
+    message = "",
+    verbose = getOption("log_verbose")) {
   if (verbose == TRUE) {
     cat(
       paste("[INFO][",
