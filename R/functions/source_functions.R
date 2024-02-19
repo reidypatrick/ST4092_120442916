@@ -4,7 +4,7 @@ source_functions <- function(py = FALSE) {
   r_functions <- list.files(r_functions_path)
 
   for (f in seq_along(r_functions)) {
-    source(file.path(r_functions_path, r_functions[f]))
+    source(file.path(r_functions_path, r_functions[f]), verbose = FALSE)
   }
 
   if (py) {
