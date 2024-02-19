@@ -20,9 +20,9 @@ fit_keras_poisson <- function(
     lr = lr,
     m = m
   )
-  
+
   log_info("Start Model Training")
-  
+
   if (verbose == TRUE) {
     print(params)
   }
@@ -57,7 +57,7 @@ fit_keras_poisson <- function(
       validation_split = 0.2,
       verbose = verbose
     )
-  
+
   more_params <- list(
     time = Sys.time() - start,
     shape = c(
@@ -66,7 +66,7 @@ fit_keras_poisson <- function(
       model$layers[[3]]$input_shape[[2]]
     )
   )
-  
+
   params <- append(
     params,
     more_params

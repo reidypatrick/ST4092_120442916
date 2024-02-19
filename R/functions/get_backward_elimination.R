@@ -1,5 +1,5 @@
 get_backward_elimination <- function(
-    source_or_run = getOption("source_or_run"), 
+    source_or_run = getOption("source_or_run"),
     formula = NULL) {
   if (!exists("backward_elimination")) {
     if (source_or_run == "object") {
