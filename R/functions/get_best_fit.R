@@ -19,5 +19,6 @@ get_best_fit <- function(model_list, tune_grid) {
     )
   }
 
-  tune_grid[metrics_df[which.min(metrics_df$mse), ]$index, ]
+  tune_grid[metrics_df[which.min(metrics_df$mse), ]$index, ] %>% 
+    mutate(across(where(is.factor), ~ as.character(.))) 
 }
