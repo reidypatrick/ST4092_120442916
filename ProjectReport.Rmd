@@ -56,7 +56,7 @@ source_functions()
 
 # config
 options(log_verbose = TRUE)
-options(source_or_run = "object")
+options(source_or_run = "source")
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
@@ -731,15 +731,11 @@ cat(
 Alternatively for more robust feature selection one can use backwards elimination
 
 ```{r glmBackElimEcho, include = FALSE, echo = TRUE}
-
+# backward_elimination <- stats::step(glm1, direction = "backward")
 ```
 
 ```{r glmBackElim, include = TRUE, echo = FALSE}
-if (global_variables$source == TRUE) {
-  backward_elimination <- get_backward_elimination("object")
-} else {
-  backward_elimination <- get_backward_elimination("run")
-}
+backward_elimination <- get_backward_elimination(glm1)
 ```
 
 ```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
@@ -884,7 +880,7 @@ tune_grid <- expand.grid(
 
 ```{r nnFit, echo = FALSE}
 # Get list of fits from tuning
-if (global_variables$source == TRUE) {
+if (getOption("source_or_run") == "source") {
   model_list <- readRDS("data/objects/model_list.rds")
 }
 
@@ -892,7 +888,7 @@ if (global_variables$source == TRUE) {
 best_fit <- get_best_fit(model_list, tune_grid)
 
 # Fit best model
-if (global_variables$source == TRUE) {
+if (getOption("source_or_run") == "source") {
   best_model <- readRDS("data/objects/best_model.rds")
 } else {
   best_model <- fit_keras_poisson(
