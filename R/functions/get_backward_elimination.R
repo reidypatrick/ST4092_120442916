@@ -8,8 +8,10 @@ get_backward_elimination <- function(
     }
     if (source_or_run == "run") {
       log_info("Running Backward Elimination")
-      backward_elimination <- stats::step(formula,
-        direction = "backward", trace = 0
+      backward_elimination <- stats::step(
+        formula,
+        direction = "backward", 
+        trace = 0
       )
     }
     log_info("Done")
