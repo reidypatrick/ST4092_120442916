@@ -10,7 +10,7 @@ get_backward_elimination <- function(
       log_info("Running Backward Elimination")
       backward_elimination <- stats::step(
         formula,
-        direction = "backward", 
+        direction = "backward",
         trace = 0
       )
     }
