@@ -12,9 +12,9 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: FALSE
+    keep_tex: TRUE
     toc: FALSE
-    extra_dependencies: ["subfig", "tikz"]
+    extra_dependencies: ["subfig", "tikz", "float"]
   author:
   - name: "Patrick Reidy"
     affiliation: "School of Mathematical Sciences, University College Cork"
@@ -40,6 +40,9 @@ csl: https://www.zotero.org/styles/ieee
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(paged.print = TRUE)
+knitr::opts_chunk$set(fig.path = "data/figures")
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "")
 
 library(OpenML)
 library(tidyverse)
@@ -55,7 +58,7 @@ source("R/functions/source_functions.R", verbose = FALSE)
 source_functions()
 
 # config
-options(log_verbose = TRUE)
+options(log_verbose = FALSE)
 options(source_or_run = "source")
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
@@ -77,445 +80,632 @@ cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 
 # Glossary {.unnumbered}
 
+GLM
+
+:   Generalised Linear Model
+
+NN
+
+:   Neural Network
+
+FFNN
+
+:   Feed Forward Neural Network
+
+LSE
+
+:   Least Squares Estimator
+
+MLE
+
+:   Maximum Likelihood Estimator
+
+EDF
+
+:   Exponential Distribution Family
+
+\newpage
+
 # Abstract
 
-## Problem Statement
+The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-## Indication of Methodology
+Classical linear regression is the earliest and simplest form of modelling [@su_2012_linear] and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
-## Main Findings
+Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised. *TODO: expand!*
 
-## Principal Conclusion
+The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance *TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
+
+\clearpage
 
 # Introduction
 
-The field of insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
+Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. This risk is evaluated using statistical models that use factors related to the risk. For example, in the context of car insurance, the profiles of both the driver and the car impact how risk is considered and priced.
 
-Linear regression, as the earliest and simplest form of modelling [@su_2012_linear], has been used in a variety of predictive applications due to its ease of interpretation and implementation. However, it struggled to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models emerged as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry.
 
-Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised.*TODO: expand!*
+To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression. However, in the case of car insurance, linear regression is not appropriate, as in its simplicity it can not reflect the spread of our data, nor the complex non-linear relationships between the selected risk factors and insurance claims. We will therefore introduce two concepts, namely Maximum Likelihood Estimation and the Exponential Distribution Family, to see how this model can be expanded to a more versatile family of models called Generalised Linear Models. This will yield a great deal of information as to the risk associated with an insurance profile. Furthermore, these models will then be again extended and generalised to produce an even more powerful modelling architecture: Neural Networks.
 
-The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance*TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
+Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
 
-## Background
+## Simple Linear Regression {.unnumbered}
 
-### Linear Regression
+Simple linear regression is a method of modelling the linear relationship between two random variables, say $X = (x_1,...,x_i,...x_n)$ and $Y = (y_1, ..., y_i, ...y_n)$. We represent this relationship as a line where
 
-Simple regression models are a statistical method to describe the relationship between two variables. They are made up of two components: the Systematic component, and the random component. In the simplest case they take the form:
+$$
+\hat{Y} = \beta_0 + \beta_1X \\
+$$
 
-$$Y = \beta_0 + \beta_1X + \epsilon$$
+Or for each observation
 
-Where:
+$$
+\hat{y_i} = \beta_0 + \beta_1x_i
+$$
 
--   $Y$ is the dependent or response variable
+Where $\hat{Y} = (\hat{y_1}, ..., \hat{y_n})$ are our predicted $y_i$ values based on the corresponding $x_i$ and $\beta_0$ is the intercept term, and $\beta_1$ is the slope coefficient.
 
--   $X$ is the independent or predictor variable
+```{r figLMLSE, include=TRUE, echo=FALSE, fig.cap="Linear Model: LSE", paged.print = TRUE, out.height="50%"}
+# Set seed for reproducibility
+set.seed(123)
 
--   $\beta_0$ is the intercept, representing the value of the response when $X = 0$
+# Generate nearly linear data
+x <- 1:25
+y_true <- 2 * x + rnorm(25, mean = 0, sd = 5)
+# True linear relationship with normally distributed error
 
--   $\beta_1$ is the coefficient that determines the slope and hence the relationship between $X$ and $Y$
+# Fit linear model
+model <- lm(y_true ~ x)
 
--   $\epsilon$ is the error term or noise, representing unexplained variability in the model
+# Predictions from the model
+y_pred <- predict(model)
 
-The random component here is the $\epsilon$ term, often assumed to be normally distributed, whereas the systematic component is the $\beta_0 + \beta_1X$
+# Plot the data and linear model
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  xlab = "X",
+  ylab = "Y"
+)
+abline(model, col = "red")
 
-This approach can be expanded to incorporate multiple predictor variables and as such takes the form
+# Add lines indicating normally distributed errors
+segments(x, y_true, x, y_pred, col = "green")
 
-$$Y = \beta_0 + (\Sigma_{i=1}^p \beta_iX_i) + \epsilon$$
-
-Where:
-
--   $Y$, $\beta_0$, and $\epsilon$ are the same as before
-
--   $p$ is the number of predictor variables
-
--   $X_i, \ i =(1,...,p)$ are the multiple predictor variables
-
--   $\beta_i, \ i = (1,...,p)$ are the coefficients that represent the relationship between $Y$ and the $X_i$ 's
-
-In order to do this, we must assume the errors are normally distributed
-
-### GLMs
-
-With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[@nelder_1972_generalized], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
-
-$$g(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
-
-Where:
-
--   $p$ is the number of predictor variables incorporated into the model
-
--   $\mu$ is the response variable
-
--   $g: \mathbb{R} \to \mathbb{R}$ is the link function that relates the expected value of $\mu$ to the linear combination of the predictors
-
--   $X_1,..., X_p$ are the predictor variables
-
--   $\beta_1,..., \beta_p$ are the coefficients that determine the slope depending on the values of $X_1,..., X_p$
-
--   $\beta_0$ represents again the intercept, or the value returned when $X_1,..., X_p$ are all equal to zero
-
-```{=html}
-<!--# 
-o Establishing a territory
-  -> Claiming centrality
-  -> Making topic generalisations
-  -> Reviewing items of previous research
-  
-  "In the past decade much research has focused on..."
-
-o Establishing a niche
-  -> Counter-claiming
-  -> Indicating a gap
-  -> Question Raising
-  -> Continuing a tradition
-  
-  "It remains unclear why..."
-
-o Occupying the niche
-  -> Outlining purposes
-  -> Announcing principal findings
-  -> Indicating Structure
-  
-  "The purpose of this study was to..."
--->
+# Add legend
+legend("topleft",
+  legend = c(
+    expression(y[i]), expression(y[i] - hat(y)[i]),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
 ```
-### Neural Networks
 
-#### Attempt 1
-
-If we recall the formula for the GLM:
-
-$$Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \ldots + \beta_pX_p + \epsilon$$
-
-We can also write this in matrix notation
+Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also included are the green lines, which represent the difference between the prediction and the true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate (LSE) of our regression parameters $\beta_0$, $\beta_1$:
 
 $$
-Y = \beta_0 + 
-\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
-\begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
+LSE(\beta) = \min\sum(y_i-\hat{y}_i)^2
 $$
 
-When looking at neural networks, we see a familiar form for a simple network with no hidden layers (these will be discussed further later). A neural network typically takes the form:
+Recalling that
 
-$$
-Y = \begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
-                    \vdots & \ddots & \vdots \\
-                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
-    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
-$$
-
-There are two key differences between this form and the previous:
-
--   There is no intercept in the NN formula, meaning the response is not necessarily being made relative to some base case
-
--   Rather than a row vector of coefficients, we instead use a $n\times p$ matrix of weights. This is especially useful in capturing relationships between variables. Of course the result of this is no longer a single value, but a vector of length $q$ which for now is arbitrarily chosen.
-
-In order to return a single value as desired, we must again multiply the results of this equation by a row vector of length $q$.
-
-$$
-Y = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
-                    \vdots & \ddots & \vdots \\
-                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
-    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
-    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
-$$
-
-Here we now have two matrices of weights, $W_1$ and $W_2$ which results in a scalar output $Y$.
-
-#### Attempt 2
-
-If we recall our GLM formula of
-
-$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
-
-We can rewrite this in matrix notation as
-
-$$
-log(\mu) = \beta_0 + 
-\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
-\begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
-$$
-
-Representing a full model of $p$ independent variables. However, for fitting a saturated model including all possible interactions, very quickly our number of variables grows to an unmanageable size. Computability, memory availability, and interpretability will all suffer. However, we can extend our set of coefficients into a matrix with an arbitrary amount of rows, say $q$ which each represent some relationship over all predictors. This will result in a formula that looks like
-
-$$
-           \begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
-                    \vdots & \ddots & \vdots \\
-                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
-           \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} 
-         = \begin{bmatrix} H_1 & \ldots & H_q\end{bmatrix} 
-$$
-
-This results in a vector of length $q$ which represents $q$ relationships from the model. Of course, as we desire a scalar output similar to how a GLM would produce, we would then need to multiply this by a column vector of length $q$ $$
-\hat{Y} = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
-                    \vdots & \ddots & \vdots \\
-                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
-    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
-    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
-$$
-
-Where $\hat{Y}$ is our new scalar output and instead of one matrix of coefficients $W$ we have $W_1$ and $W_2$. It may also at this stage be helpful to make an adjustment similar to what we do for interpreting GLMs where
-
-$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
-
-And after getting the exponential of both sides, this becomes equivalent to
-
-$$\mu = exp(\beta_0 + \beta_1X_1 +...+ \beta_pX_p)$$
-
-And applying this to our matrix notation we now get
-
-$$
-\hat{Y} = exp\left(\begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\ 
-                    \vdots & \ddots & \vdots \\
-                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
-    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
-    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}\right)
-$$ It is clear that with the nesting of these processes, the architecture becomes very difficult to understand. We can write this in a more sequential pattern as following:
-
-$$
-  \begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
-                  \vdots & \ddots & \vdots \\
-                  W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
-  \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
-                = \begin{bmatrix} H_{1,1} \\ \vdots \\ H_{1,q} \end{bmatrix}
-\Rightarrow
-           \begin{bmatrix} H_1 \\ \vdots \\ H_q \end{bmatrix}
-    \times \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
-    = H_2
-\Rightarrow
-    \exp(H_2)
-    = \hat{Y}
-$$
-
-This can be made even clearer visually by representing vectors and matrices as nodes in a network, and producing a computation graph.
+$$\hat{y_i} = \beta_0 + \beta_1x_i$$ We can write this as
 
 ```{=tex}
-\begin{figure}
-    \centering
-      \begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
-      % Input layer
-      \node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
-      \node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
-      
-      \node[circle, draw, fill=red!20] (H1) at (2,-1) {$H_1$};
-      \node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
-      
-      % Labels
-      \node[above=0.5cm of X] {Input Layer};
-      
-      % Connect Nodes
-      \draw[->] (X) -- (star1);
-      \draw[->] (W1) -- (star1);
-      \draw[->] (star1) -- (H1);
-      
-      % First Hidden Layer
-      \node[circle, draw, fill=blue!20] (W2) at (2,-2) {$W_2$};
-      
-      \node[circle, draw, fill=red!20] (H2) at (4,-1) {$H_2$};
-      \node[circle, draw, fill=green!20] (star2) at (3,-1) {$*$};
-      
-      % Connect Nodes
-      \draw[->] (W2) -- (star2);
-      \draw[->] (H1) -- (star2);
-      
-      % Final Layer
-      \node[circle, draw, fill=green!20] (link) at (5,-1) {$exp$};
-      \node[circle, draw, fill=yellow!20] (output) at (6,-1) {$\hat{Y}$};
-      
-      % Connect Nodes
-      \draw[->] (star2) -- (H2);
-      \draw[->] (H2) -- (link);
-      \draw[->] (link) -- (output);
-    
-    \end{tikzpicture}
-    \caption{Computation Graph of Adapted GLM??}
-    \label{fig:simple_comp_graph}
-  \end{figure}
+\begin{equation} LSE(\beta) = \min\sum(y_i-(\beta_0+\beta_1x_i))^2 (\#eq:LSE) \end{equation}
 ```
-Where:
+Now we can find, using partial derivatives, the $\beta_0$ and $\beta_1$ that minimise this value.
 
--   The yellow nodes $X$, $\hat{Y}$ are the inputs and outputs of our model.
-
--   The blue nodes $W_1$ and $W_2$ are our matrices of weights.
-
--   The green nodes are functions, where an incoming arrow indicates inputs and outgoing indicates output.
-
--   The red nodes are intermediary steps, where the output of a previous function is the input of a subsequent function. *Note: These are displayed here as a visual aid to relate to previous formulae. In practice, these are not necessarily saved nor important, and will cease to be used in future diagrams. They are useful to visualise the concept of "hidden layers", but really this applies more to the functions either side of where these are shown.*
-
-#### Loss Function vs MLE
-
-The parameters $\beta$ in a GLM are found by maximising their likelihood function given the data. Given that we are assuming a poisson distribution, this likelihood function is just the product of the pdfs of the observations.
+This can also be extended for Multiple Linear Regression, where we have more than one predictor variable $x$, and instead we use the formula
 
 $$
-L(\beta|y) = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}
+\hat{y_i} = \beta_0 + \sum^p_{j=1}\beta_jx_{ij}
 $$
 
-Where $\mu_i = exp(\beta_0 + \beta_1X_{i,1} + \ldots + \beta_pX_{i,p})$. We can now take the log likelihood
+Where i = 1,...,n.
 
-$$
-L(\beta|y)  = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}\\
-\ell(\beta|y)   = \sum^n_{i=1} log( \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!})\\
-             = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) - log(y_i!)
-$$
+However, for the time being, it will be assumed there is only one predictor variable $x$ for ease of notation.
 
-Seeing as $log(y_i!)$ is independent of our parameters we can ignore this when maximising the function, leaving us with:
+## Maximum Likelihood Estimator {.unnumbered}
 
-$$
-\ell(\beta|y) = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i)
-$$
+A different approach lies in understanding that often we can assume the following:
 
-It is clear that for a large GLM with many predictor variables in $\mu_i$, calculating each step in this function for every observation becomes very expensive. Because of this optimisation functions are employed. These include (the R default) Iteratively Weighted Least Squares (IWLS), Stochastic Gradient Descent (SCG), Newton-Raphson and Fisher Scoring Iteration.
-
-When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly. This loss function is obtained identically to the Maximum Likelihood Estimate for the GLM where we have
-
-$$
-\ell(\lambda|y) = \sum^n_{i=1}-\lambda_i + y_ilog(\lambda_i)
-$$
-
-In this case where $\lambda$ is the latest model output. However instead of maximising this function we want to minimise it, which is equivalent to maximising the negative of this function.
-
-$Loss = \lambda + ylog(\lambda)$
-
-*These are calculated in batches of 512/1024 for computational efficiency, here* $\lambda$ *and* $y$ *are to be* *understood as vectors with length of batchsize. Could just be written as sum as well.*
-
-Once again, computational constraints require that some method is used to optimise this process, for NNs these include SCG again, Adam, etc.
-
-It can be shown that there is no mathematical difference in what a simple NN of 0 hidden layers with exponential activation function produces and that of a GLM, though they're may be computational differences.
-
-# Outline
-
-## Linear Regression
-
-Linear regression dates back to the early 19th century as a method for modellin the relationship between two variables, $Y$ and $X$. They operate on three key assumptions:
-
-1.  The observations or the $y_is$ are independent
+1.  The observations $y_i$ are independent
 
 2.  The observations are normally distributed with $y_i \sim N(\mu_i, \sigma^2)$
 
-3.  $\mu_i = X_i^T\beta = \beta_0 + \sum_{i=1}^n \beta_iX_i$
+3.  We can estimate these $\mu_i$ with a line of the form $\mu_i = \beta_0 + \beta_1X_i$
 
-With this we can create a model of $Y$ of the form:
+```{r figLMMLE, fig.cap = "Linear Model: MLE", , out.height="50%"}
+# Set seed for reproducibility
+set.seed(123)
 
-$$
-Y = \beta_0 + \sum^n_{i=1}\beta_iXi
-$$
+# Generate nearly linear data
+x <- 1:25
+y_true <- 2 * x + rnorm(25, mean = 0, sd = 3)
+# True linear relationship with normally distributed error
 
-These $\beta$ parameters are determined using a Least Squares Estimate (LSE)
+# Fit linear model
+model <- lm(y_true ~ x)
 
-$$
-\min \sum^n_{i=1}(y_i-\mu_i)^2 = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^n_{i=1}\beta_iXi))^2
-$$
+# Predictions from the model
+y_pred <- predict(model)
 
-## Generalised Linear Models
+# Plot the data and linear model
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  main = "Linear Model: MLE",
+  xlab = "X",
+  ylab = "Y"
+)
+abline(model, col = "red")
 
-Generalised Linear Models (GLMs) were an extension or in fact as the name suggests a generalisation of this form to all distributions in the Exponential Dispersion Family (EDF) which expanded the assumption such that:
+# Add bell curves around each true data
+# point to represent normally distributed errors
+for (i in seq(1, 25, 5)) {
+  points <- rnorm(100, mean = y_pred[i], sd = 1.5)
+  d <- density(points)
+  lines(i + d$y, d$x, col = "green", lwd = 2)
+}
 
-1.  The observations or the $y_is$ are independent
-
-2.  $y_i \sim$ Exponential Dispersion Family, which take the form:
-
-    $$
-    f(y) = \exp(\frac{1}{a(\phi}(y\theta-b(\theta)) + c(y,\phi)
-    $$
-
-3.  There is some $g(\mu_i) = X_i^T\beta = \beta_0 + \sum_{i=1}^n \beta_iX_i$
-
-What we find is that for distributions in this class, this function $g$, known as the link function can be derived from the form in assumption (2). For the poisson family, we find that this function is the $log$ function. Meaning we can construct a model of the form:
-
-$$
-log(\mu_i) = \beta_0 + \sum^n_{i=1}\beta_iXi
-$$
-
-We can take this to mean that while we can not fit a linear model to out target variable, we can fit a linear model to the log of our target variable.
-
-Another key difference was the use of a Maximum Likelihood Estimator (MLE) in place of an LSE. Of course for a Normal Distribution, these are the same. However, for other distributions in the EDF, this is not the case. We derive the MLE for a poisson distribution starting with the Likelihood function of the $\beta s$ given the true data as:
-
-$$ L(\beta|y) = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} $$
-
-Where $\mu_i = exp(\beta_0 + \beta_1X_{i,1} + \ldots + \beta_pX_{i,p})$. We can now take the log likelihood
-
-$$ L(\beta|y)  = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}\\ \ell(\beta|y)   = \sum^n_{i=1} log( \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!})\\              = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) - log(y_i!) $$
-
-Seeing as $log(y_i!)$ is independent of our parameters we can ignore this when maximising the function, leaving us with:
-
-$$ \ell(\beta|y) = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) $$
-
-It is clear that for a large GLM with many predictor variables in $\mu_i$, calculating each step in the maximisation function for every observation becomes very expensive. Because of this optimisation functions are employed. These include (the R default) Iteratively Weighted Least Squares (IWLS), Stochastic Gradient Descent (SCG), Newton-Raphson and Fisher Scoring Iteration. These are all different methods of finding the optimal $\beta$ in order to maximise likelihood.
-
-## Neural Networks
-
-Neural Networks (NNs), while possibly theorised in the mid 20th century, only began realising their potential in recent decades, as computational resources began to enable the architecture to outperform classical statistical models. A neural network consists of multiple layers, each containing nodes. Typically, a NN will have an input layer, which takes in a vector of inputs, multiplies this with a matrix of weights, adds a bias term to each output, and then applies an activation function which is used to capture non-linearity in the data, much like we have seen with the link function in GLMs, namely the log function in the context of Poisson GLMs. This yields
-
-$$ \hat{y} = 
-\begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
-                    \vdots & \ddots & \vdots \\
-                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
-  \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} 
-+ \begin{bmatrix}b_1 \\ \vdots \\ b_p\end{bmatrix}
-$$
-
-$$
-Y = [WX+b \Rightarrow Activation Function]
-$$
-
-Where:
-
--   Y is the target or response variable
-
--   X is the vector of predictor variables, say of length $p$
-
--   W is the matrix of weights, with $p$ columns and say some arbitrary $q$ rows.
-
--   $ActivationFunction$ is some function that augments the result to capture non-linearity.
-
-This form only applies to the input layer of the model, as the resultant value(s) would then be fed into a "hidden" layer, where this procedure $WX+b \Rightarrow ActivationFunction$ is again applied, except X is now the output of the previous layer. As may already be clear, it can become quite cumbersome to notate this process, and so NNs are often visualised with computation graphs, one of which for a NN with a typical structure can be seen below:
-
-```{r, figDummyCompGraph, results="asis", echo=FALSE}
-cat(get_computation_graph_tex(
-  act_funs = c("", "", ""),
-  name = "figDummyCompGraph"
-))
+legend(
+  "topleft",
+  legend = c(
+    expression(y[i]),
+    expression(
+      paste("f(y"[i], " | y"[i], " ~ N(", mu[i], ", ", sigma^2, "))")
+    ),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
 ```
 
+Above is a representation of these assumptions, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
+
+$$
+\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
+$$
+
+To find the joint probability across all observations we get
+
+$$
+\prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
+$$
+
+But recall that $\mu_i = \beta_0+\beta_1x_i$, and we would like to maximise this probability with respect to the $\beta's$. We can write this as instead a likelihood function
+
+$$
+\mathcal{L}(\beta|Y) = \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
+$$
+
+We know that any $\beta$ that maximises this function also maximises the log likelihood function denoted $\ell(\beta|Y)$, which also helps in evaluating the right hand side
+
+$$
+\ell(\beta|Y) = \sum^n_{i=1} -\log(\sqrt{2\pi\sigma^2}) - \frac{(y_i - \mu_i)^2}{2\sigma^2}
+$$
+
+Seeing as we are only interested in terms here that relate to $\beta$ and $y_i$, we can ignore some terms and finally we have
+
+$$
+\ell(\beta|Y) = -\sum(y_i-\mu_i)^2
+$$
+
+We now want to maximise this value, but as it is a negative quantity, this is the same as minimising the negative of the function, and notate this as our Maximum Likelihood Estimator (MLE)
+
+$$
+MLE(\beta) = \min\sum(y_i-\mu_i)^2
+$$
+
+If we replace $\mu_i$ with our linear model, we get
+
+```{=tex}
+\begin{equation} MLE(\beta) = \min\sum(y_i-(\beta_0 + \beta_1x_i)^2 (\#eq:MLE) \end{equation}
+```
+Note: Once again, this form can be extended for multiple predictor variables $x$, where it takes the form
+
+$$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
+
+In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Dispersion Family (EDF).
+
+## Exponential Dispersion Family {.unnumbered}
+
+Nelder and Wedderburn @nelder_1972_generalized devised a method for generalising the above form, by first generalising the pdf and the notion of a family of distributions. This family takes the form
+
+```{=tex}
+\begin{equation} f(y) = exp\left(\frac{y\theta - b(\theta)}{a(\phi)} + c(y, \phi)\right) (\#eq:EDF) \end{equation}
+```
 Where:
 
--   The yellow nodes $X$, $\hat{y}$ are the inputs and outputs of our model respectively, while $y$ is the true value of the target variable.
+-   $y$ is some observation from a distribution in the EDF
 
--   The blue nodes $W_1$ and $W_2$ are our matrices of weights.
+-   $\theta$ is called the natural or canonical parameter, that itself can be expressed as some function of the true mean as $g(\mu)$
 
--   The green nodes are functions, where an incoming arrow indicates inputs and outgoing indicates output.
+-   $\phi$ is called the dispersion parameter
 
--   The red nodes are the activation functions, which capture the non-linearity in the model.
+-   $a$, $b$ and $c$ are some known functions of these parameters
 
-When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly. This loss function is obtained identically to the Maximum Likelihood Estimate for the GLM where we have
+It is further shown that by treating the above as a likelihood, and maximising with respect to $\theta$
 
-$$ \ell(\lambda|y) = \sum^n_{i=1}-\lambda_i + y_ilog(\lambda_i) $$
+$$
+\frac{\partial\mathcal{L}}{\partial\theta} = y-b'(\theta) := 0
+$$
+
+Where $b'(\theta)$ will be equal to the true mean of this distribution, so
+
+$$
+\frac{\partial\mathcal{L}}{\partial\theta} = y-\mu = 0
+$$
+
+In other words, finding some optimal predictor for $\theta$ will effectively obtain the best estimate for the true mean of the distribution from which $y$ comes.
+
+For the normal distribution we can see that we can take
+
+$$
+f(y) = \frac{1}{\sqrt{2\pi\sigma^2}}exp\left({\frac{(y-\mu)^2}{2\sigma^2}}\right)
+$$
+
+and rewrite this as
+
+```{=tex}
+\begin{align*} 
+f(y) & = exp\left( -\frac{(y^2 + \mu^2 - 2y\mu)}{2\sigma_2} -\frac{1}{2}log(2\pi\sigma^2)\right) \\ 
+f(y) & = exp\left(\frac{y\mu - \frac{\mu^2}{2}}{\sigma^2} - \frac{y^2}{2\sigma^2} -
+\frac{1}{2}log(2\pi\sigma^2)   \right)
+\end{align*}
+```
+And so to obtain \@ref(eq:EDF) we choose the following
+
+```{=tex}
+\begin{align*}
+\theta & = \mu &
+b(\theta) & = \frac{\theta^2}{2}  = \frac{\mu^2}{2} \\
+\phi & = \sigma^2 & 
+a(\phi) & = \phi  =\sigma^2 \\
+c(y,\phi) & = - \frac{y^2}{2\sigma^2} -
+\frac{1}{2}log(2\pi\sigma^2)
+\end{align*}
+```
+Here, our natural parameter $\theta$ is simply equal to the mean $\mu$, with $g(\theta)$ simply being the identity function. It is also demonstrated here that
+
+$$
+b'(\theta) = \frac{d}{d\theta}\frac{\theta^2}{2} = \theta = \mu
+$$
+
+With the combined notions of the MLE and the EDF, we can generalise this process to work for any distribution in the EDF.
+
+## Generalised Linear Models {.unnumbered}
+
+```{r figGLMMLE, fig.cap = "Non-linear Model"}
+set.seed(09022024)
+x <- 1:25
+y_true <- x * rexp(25, rate = 1)
+# True linear relationship with normally distributed error
+
+# Fit linear model
+model <- lm(y_true ~ x)
+
+# Predictions from the model
+y_pred <- predict(model)
+
+
+# Plot the data and linear model
+plot(
+  x,
+  y_true,
+  col = "blue",
+  pch = 20,
+  xlab = "X",
+  ylab = "Y",
+  ylim = c(0, 85)
+)
+abline(model, col = "red")
+
+for (i in seq(2, 25, 4)) {
+  points <- rexp(10000, rate = 0.5)
+  d <- density(points)
+  lines(i + d$y, y_true[i] + d$x, col = "green", lwd = 2)
+}
+
+legend(
+  "topleft",
+  legend = c(
+    expression(y[i]),
+    expression(paste("f(y"[i], ")")),
+    expression(hat(Y) == beta[0] + beta[1] * X)
+  ),
+  col = c("blue", "green", "red"),
+  pch = c(20, NA, NA),
+  lty = c(NA, 1, 1),
+  cex = 0.8
+)
+```
+
+Here we see that our $y_is$ are clearly not distributed normally, rather by some other distribution $f(y_i)$ illustrated by the green densities, and as such any linear predictor, such as is shown in red, will not accurately model our data.
+
+For the purpose of this report, we will be looking at insurance claim as a count, which is known to follow a Poisson distribution, the density of which can be seen below.
+
+```{r figPoiHist, fig.cap = "Histogram of a Poisson Random Variable"}
+set.seed(120442916)
+y <- rpois(100, 4)
+
+hist(y, freq = FALSE)
+lines(density(y), lwd = 2, col = "green")
+```
+
+For the poisson distribution, we begin with
+
+$$ f(y) = \frac{e^{-\lambda}\lambda^y}{y!} $$
+
+This can be written as
+
+```{=tex}
+\begin{align*} f(y) & = exp\left(-\lambda + y\log(\lambda) -\log(y!) \right) \tag{**} \\ f(y) & = exp\left( \frac{y\log(\lambda) - \lambda}{1} -\log(y_i!)\right)  \end{align*}
+```
+And so to obtain \@ref(eq:EDF) we choose
+
+```{=tex}
+\begin{align*} \theta & = \log(\lambda) & b(\theta) = e^\theta = \lambda \\ \phi & = 1 &  a(\phi) = 1 \\ c(y,\phi) & = -\log(y!) \end{align*}
+```
+And in this case our natural parameter $\theta$ is equal to the log of our true mean $\lambda$. From this we conclude that to best predict the true mean of the distribution of some $y_i \sim Poi(\lambda_i)$, we now fit a model to this function of $\lambda_i$.
+
+$$ \log(\lambda_i) = \beta_0 + \beta_1x_i $$
+
+Or for multiple $x$
+
+```{=tex}
+\begin{equation} \log(\lambda_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij} (\#eq:PoiGLM) \end{equation}
+```
+In the terminology of @nelder_1972_generalized, a GLM is made up of two components: The random component and the systematic component. The random component refers to $\beta_0 + \Sigma^p_{i=1}\beta_ix_i$, that is the linear combination of our predictor variables and our regression parameters, arrived at using the MLE. The random component refers to the $g(\mu_i)$, that is our link function, which captures the fact that our data emerges from a probability distribution of some mean $\mu$ which is dependent on our predictor variables $x_1, \ldots, x_p$ . This yields our general formula for a GLM
+
+```{=tex}
+\begin{equation} g(\mu_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij} (\#eq:GLM) \end{equation}
+```
+## Neural Networks
+
+### Structure
+
+Neural Networks (NNs), while possibly theorised in the mid 20th century, only began realising their potential in recent decades, as computational resources began to enable the architecture to outperform classical statistical models. As discussed in @lu2020universal, a two layer "deep" NN is sufficient in the context of most problems. The architecture for such networks can be seen below.
+
+```{r figIntroNetwork, results="asis", fig.cap = "Architecture of Neural Network"}
+cat(get_network_tex(
+  "figIntroNetwork",
+  n_input = "p",
+  n_hidden1 = "q",
+  n_hidden2 = "q"))
+```
+
+```{=tex}
+\begin{figure}
+  \centering
+    \begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
+    % Input layer
+    \node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
+    \node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
+    \node[circle, draw, fill=blue!20] (b1) at (0,-3) {$b_1$};
+
+    \node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
+    \node[circle, draw, fill=green!20] (plus1) at (2,-1) {$+$};
+    
+    \node[circle, draw, fill=red!20] (act_fun1) at (3,-1) {$ Act1 $};
+
+    \node[circle, draw, fill=yellow!20] (h1) at (4,-1) {$H_1$};
+
+    % Labels
+    \node[above=0.5cm of X] {Input Layer};
+
+    % Connect Nodes
+    \draw[->] (X) -- (star1);
+    \draw[->] (W1) -- (star1);
+
+    \draw[->] (star1) -- (plus1);
+    \draw[->] (b1) -- (plus1);
+
+    \draw[->] (plus1) -- (act_fun1);
+    \draw[->] (act_fun1) -- (h1);
+
+    % First Hidden Layer
+    \node[circle, draw, fill=blue!20] (W2) at (4,-2) {$W_2$};
+    \node[circle, draw, fill=blue!20] (b2) at (4,-3) {$b_2$};
+
+    \node[circle, draw, fill=green!20] (star2) at (5,-1) {$*$};
+    \node[circle, draw, fill=green!20] (plus2) at (6,-1) {$+$};
+    
+    \node[circle, draw, fill=red!20] (act_fun2) at (7,-1) {$ Act2 $};
+
+    \node[circle, draw, fill=yellow!20] (h2) at (8,-1) {$H_2$};
+
+    % Labels
+    \node[above=0.5cm of h1] {Hidden Layer 1};
+
+    % Connect Nodes
+    \draw[->] (h1) -- (star2);
+    \draw[->] (W2) -- (star2);
+
+    \draw[->] (star2) -- (plus2);
+    \draw[->] (b2) -- (plus2);
+
+    \draw[->] (plus2) -- (act_fun2);
+
+    % Second Hidden Layer
+    \node[circle, draw, fill=blue!20] (W3) at (8,-2) {$W_3$};
+    \node[circle, draw, fill=blue!20] (b3) at (8,-3) {$b_3$};
+
+    \node[circle, draw, fill=green!20] (star3) at (9,-1) {$*$};
+    \node[circle, draw, fill=green!20] (plus3) at (10,-1) {$+$};
+
+    \node[circle, draw, fill=red!20] (act_fun3) at (11,-1) {$ Act3 $};
+
+    % Labels
+    \node[above=0.5cm of h2] {Hidden Layer 1};
+
+    % Connect Nodes
+    \draw[->] (act_fun2) -- (h2);
+    \draw[->] (h2) -- (star3);
+    \draw[->] (W3) -- (star3);
+
+    \draw[->] (star3) -- (plus3);
+    \draw[->] (b3) -- (plus3);
+
+    \draw[->] (plus3) -- (act_fun3);
+
+    % Final Layer
+    \node[circle, draw, fill=yellow!20] (output) at (12,-1) {$\hat{y_i}$};
+    \node[circle, draw, fill=red!20] (loss) at (12,-2) {$Loss$};
+    \node[circle, draw, fill=yellow!20] (truth) at (12,-3) {$y_i$};
+
+    % Labels
+    \node[above=0.5cm of act_fun3] {Output};
+
+    % Connect Nodes
+    \draw[->] (act_fun3) -- (output);
+    \draw[->] (output) -- (loss);
+    \draw[->] (truth) -- (loss);
+
+  \end{tikzpicture}
+  \caption{Computation Graph of Neural Network}
+  \label{fig:figIntroDummyCompGraph}
+\end{figure}
+```
+Above can be seen two representations of the architecture underlying NNs. Figure \ref{fig: figIntroNetwork } shows the fully connected network, with two hidden layers. Figure \ref{fig:figIntroDummyCompGraph} shows the computation graph where:
+
+-   $X$ is a vector of predictor variables
+
+-   The blue nodes represent the model parameters, the weights $W$ and biases $b$, that make up each hidden layer. These are the trainable parameters, equivalent to $\beta_0,...,\beta_p$ in a GLM.
+
+-   The green nodes are simple matrix operations where an incoming arrow indicates input parameters and the outgoing arrows indicate output.
+
+-   The red nodes are our activation functions and also the loss function. The activation functions account for non-linearity in the model, and can be considered similar to how a link function is used in a GLM. The Loss function is used to determine updates to our trainable parameters, similar to how the MLE is used in a GLM.
+
+-   The final two yellow nodes are our prediction $\hat{y_i}$ and the ground truth $y_i$, which are used to calculate the loss function.
+
+It will eventually be seen how we arrive at this model, but firstly, we consider a NN at its simplest. We define a NN with 0 hidden layers, and some activation function $f$. Visualised in a similar fashion to \@ref(fig:figIntroDummyCompGraph) we get
+
+```{=tex}
+\begin{figure}
+  \centering
+    \begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
+    % Input layer
+    \node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
+    \node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
+    \node[circle, draw, fill=blue!20] (b1) at (0,-3) {$b_1$};
+
+    \node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
+    \node[circle, draw, fill=green!20] (plus1) at (2,-1) {$+$};
+    
+    \node[circle, draw, fill=red!20] (act_fun1) at (3,-1) {$ f $};
+
+    % Labels
+    \node[above=0.5cm of X] {Input Layer};
+
+    % Connect Nodes
+    \draw[->] (X) -- (star1);
+    \draw[->] (W1) -- (star1);
+
+    \draw[->] (star1) -- (plus1);
+    \draw[->] (b1) -- (plus1);
+
+    \draw[->] (plus1) -- (act_fun1);
+
+    
+
+    % Final Layer
+    \node[circle, draw, fill=yellow!20] (output) at (4,-1) {$\hat{y_i}$};
+    \node[circle, draw, fill=red!20] (loss) at (4,-2) {$Loss$};
+    \node[circle, draw, fill=yellow!20] (truth) at (4,-3) {$y_i$};
+
+    % Labels
+    \node[above=0.5cm of output] {Output};
+
+    % Connect Nodes
+    \draw[->] (act_fun1) -- (output);
+    \draw[->] (output) -- (loss);
+    \draw[->] (truth) -- (loss);
+
+  \end{tikzpicture}
+  \caption{Computation Graph of Zero-Layer NN}
+  \label{fig:figZeroLayerCompGraph}
+\end{figure}
+```
+This is now in a form simple enough to express mathematically as below
+
+```{=tex}
+\begin{equation}
+\hat{y_i} = f \left( \begin{bmatrix} W_1, \ldots, W_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip} \end{bmatrix} + b \right)
+\end{equation}
+```
+We can multiply out the weights with our predictor variables, and move our activation function to the left-hand side, giving
+
+```{=tex}
+\begin{equation} f^{-1}(\hat{y_i}) = b + \sum^p_{j=1}W_jx_{ij} (\#eq:ZeroNN) \end{equation}
+```
+And recalling our general form of our GLM \@ref(eq:GLM)
+
+```{=tex}
+\begin{equation} g(\mu_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij} \tag{\ref{eq:GLM}} \end{equation}
+```
+It can be concluded that our simple NN contains both components of a GLM, namely the random component in the form of $g(\mu_i) = f^{-1}(y_i)$, or the inverse of our activation function, and the systematic component $\beta_0 + \sum^p_{j=1}\beta_jx_{ij} = b + \sum^p_{j=1}W_jx_{ij}$. It remains however to discuss in detail how the trainable parameters in NNs are calculated.
+
+### Loss Function
+
+When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly.
+
+Many different loss functions are available to choose from. In the context of insurance pricing, we believe that given our data are non-negative, discrete counts and therefore follow a poisson distribution. The loss function in this case is obtained identically to the Maximum Likelihood Estimate for the GLM where we have
+
+$$ \ell(\lambda|y) = \sum^n_{i=1} y_ilog(\lambda_i) -\lambda_i + log(y_i!)$$
 
 In this case where $\lambda$ is the latest model output. However instead of maximising this function we want to minimise it, which is equivalent to maximising the negative of this function.
 
-$Loss = \lambda + ylog(\lambda)$
+$Loss = \lambda - ylog(\lambda) - log(y!)$
 
-*These are calculated in batches of 512/1024 for computational efficiency, here* $\lambda$ *and* $y$ *are to be* *understood as vectors with length of batchsize. Could just be written as sum as well.*
+Thus it can be concluded that the systematic component of a GLM is calculated in the same way as that of the trainable parameters of a NN.
 
-Once again, computational constraints require that some method is used to optimise this process, for NNs these include SCG again, Adam, etc.
+### Conclusion
 
-## Bringing it All Together
+If we recall \@ref(eq:GLM) our GLM formula of
 
-If we recall our GLM formula of
-
-$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+$$\log(\lambda_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij}$$
 
 We can rewrite this in matrix notation as
 
-$$ log(\mu) = \beta_0 +  \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} $$
+$$ log(\lambda_i) = \beta_0 +  \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip}\end{bmatrix} $$
 
 We can rearrange this as:
 
-$$ log(\mu) = \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} + \beta_0 $$
+$$ log(\lambda_i) = \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip}\end{bmatrix} + \beta_0 $$
 
-# Literature Review
+And we consider this not as a linear model fitted to a function of some mean, but rather as the exponential of some linear function fitted to the mean we get
 
+```{=tex}
+\begin{equation}
+\lambda_i = exp \left( \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip} \end{bmatrix} + \beta_0 \right) 
+(\#eq:GLMNN)
+\end{equation}
+```
+Now recall our NN formula \@ref(eq:ZeroNN), except with no hidden layers we arrive at
+
+```{=tex}
+\begin{equation}
+\hat{y} = ActivationFunction \left( \begin{bmatrix} W_1, \ldots, W_p\end{bmatrix} \begin{bmatrix} x_{i1} \\ \vdots \\ x_{ip} \end{bmatrix} + b \right) (\#eq:NNGLM)
+\end{equation}
+```
+We see that designing a NN of 0 hidden layers, with exponential activation function will produce a function \@ref(eq:NNGLM) equivalent to that of a Poisson GLM \@ref(eq:GLMNN). When we also consider that our loss function was defined to be the MLE of a poisson distribution, we see also that the weights and bias of our NN our calculated the same way that a GLM calculates the regression parameters $\beta$.
+
+```{=tex}
+\begin{equation} \begin{bmatrix} W_{11} & \ldots & W_{1p} \\                      \vdots & \ddots & \vdots \\                     W_{q1} & \ldots & W_{qp}\end{bmatrix}    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}  + \begin{bmatrix}b_1 \\ \vdots \\ b_p\end{bmatrix}
+ = \begin{bmatrix} H_1 \\ \vdots \\ H_q \end{bmatrix} (\#eq:NNLayer1) \end{equation}
+```
 # Methodology
 
 ```{=html}
@@ -597,14 +787,6 @@ As ClaimNb is the response variable it is no doubt the most important variable t
 *Discuss each plot in turn and insights yielded, Motivation behind each plot*
 
 *Histogram of every factor vs ClaimNb - Area, Vehpower, VehAge, VehBrand, VehGas, Region* *Scatterplot of every numeric vs ClaimNb - Exposure, DrivAge, Density* *Map of every variable*
-
-See Figure \@ref(fig:figHist-1)
-
-See Figure \@ref(fig:figHist-2)
-
-See Figure \@ref(fig:figHist-3)
-
-See Figure \@ref(fig:figHist-4)
 
 \newpage
 
@@ -735,7 +917,7 @@ Alternatively for more robust feature selection one can use backwards eliminatio
 ```
 
 ```{r glmBackElim, include = TRUE, echo = FALSE}
-backward_elimination <- get_backward_elimination(glm1)
+backward_elimination <- get_backward_elimination(formula = glm1)
 ```
 
 ```{r glmBackSummaryCoef, include = TRUE, echo = FALSE}
@@ -771,7 +953,7 @@ summary(backward_elimination)$coefficients %>%
   )
 ```
 
-```{r summary(backward_elimination)Details, echo = FALSE, include = TRUE}
+```{r glmBackElimSum, Details, echo = FALSE, include = TRUE}
 cat(
   "     Null Deviance:", summary(backward_elimination)$null.deviance, "on",
   summary(backward_elimination)$df.null, "degrees of freedom\n",
@@ -931,8 +1113,9 @@ metrics_df <- data.frame(
 
 Below we can see the architecture of the neural network
 
-```{r, nnFigNetwork, results='asis', echo=FALSE}
+```{r nnFigNetwork, results='asis', echo=FALSE}
 cat(get_network_tex(
+  name = "figNetwork",
   n_input = best_model$params$shape[1],
   n_hidden1 = best_model$params$shape[2],
   n_hidden2 = best_model$params$shape[3]
@@ -941,7 +1124,7 @@ cat(get_network_tex(
 
 Below we can see the computation graph of the neural network
 
-```{r, nnCompGraph, results='asis', echo=FALSE}
+```{r nnCompGraph, results='asis', echo=FALSE}
 cat(get_computation_graph_tex(name = "nnCompGraph",
   act_funs = as.character(c(
     best_fit$t_hidden_act1,
@@ -990,9 +1173,9 @@ o Recommendations
 ```
 # Conclusion
 
-# Acknowledgements
-
-# References
+# References {.unnumbered}
 
 ::: {#refs}
 :::
+
+# Acknowledgements {.unnumbered}
