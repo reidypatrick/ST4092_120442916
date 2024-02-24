@@ -1,0 +1,303 @@
+# Introduction
+
+1.  Insurance companies seek to find the best model for estimation of insurance premiums.
+2.  The level of premium is governed by many risk factors. For example, in the context of car insurance, the profile of the driver or car impacts how risk is considered and priced.
+3.  Insurance risk selection refers to the process by which insurers determine whether to insure an individual and the premium to charge.
+4.  Car insurance is an insurance designed to offer financial protection... The premium is annually derived from statistical modelling of annual frequencies of claims.
+
+### Linear Regression
+
+Simple regression models are a statistical method to describe the relationship between two variables. They are made up of two components: the Systematic component, and the random component. In the simplest case they take the form:
+
+$$Y = \beta_0 + \beta_1X + \epsilon$$
+
+Where:
+
+-   $Y$ is the dependent or response variable
+
+-   $X$ is the independent or predictor variable
+
+-   $\beta_0$ is the intercept, representing the value of the response when $X = 0$
+
+-   $\beta_1$ is the coefficient that determines the slope and hence the relationship between $X$ and $Y$
+
+-   $\epsilon$ is the error term or noise, representing unexplained variability in the model
+
+The random component here is the $\epsilon$ term, often assumed to be normally distributed, whereas the systematic component is the $\beta_0 + \beta_1X$
+
+This approach can be expanded to incorporate multiple predictor variables and as such takes the form
+
+$$Y = \beta_0 + (\Sigma_{i=1}^p \beta_iX_i) + \epsilon$$
+
+Where:
+
+-   $Y$, $\beta_0$, and $\epsilon$ are the same as before
+
+-   $p$ is the number of predictor variables
+
+-   $X_i, \ i =(1,...,p)$ are the multiple predictor variables
+
+-   $\beta_i, \ i = (1,...,p)$ are the coefficients that represent the relationship between $Y$ and the $X_i$ 's
+
+In order to do this, we must assume the errors are normally distributed
+
+### GLMs
+
+With the advent of Generalised Linear Models discussed by Nelder and Wedderburn[@nelder_1972_generalized], the technique of regression modelling was expanded to yield more robust and effective models. The introduction of a link function is used to capture the non-normal distribution of the data. These are defined as:
+
+$$g(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+Where:
+
+-   $p$ is the number of predictor variables incorporated into the model
+
+-   $\mu$ is the response variable
+
+-   $g: \mathbb{R} \to \mathbb{R}$ is the link function that relates the expected value of $\mu$ to the linear combination of the predictors
+
+-   $X_1,..., X_p$ are the predictor variables
+
+-   $\beta_1,..., \beta_p$ are the coefficients that determine the slope depending on the values of $X_1,..., X_p$
+
+-   $\beta_0$ represents again the intercept, or the value returned when $X_1,..., X_p$ are all equal to zero
+
+```{=html}
+<!--# 
+o Establishing a territory
+  -> Claiming centrality
+  -> Making topic generalisations
+  -> Reviewing items of previous research
+  
+  "In the past decade much research has focused on..."
+
+o Establishing a niche
+  -> Counter-claiming
+  -> Indicating a gap
+  -> Question Raising
+  -> Continuing a tradition
+  
+  "It remains unclear why..."
+
+o Occupying the niche
+  -> Outlining purposes
+  -> Announcing principal findings
+  -> Indicating Structure
+  
+  "The purpose of this study was to..."
+-->
+```
+### Neural Networks
+
+#### Attempt 1
+
+If we recall the formula for the GLM:
+
+$$Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \ldots + \beta_pX_p + \epsilon$$
+
+We can also write this in matrix notation
+
+$$
+Y = \beta_0 + 
+\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
+\begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
+$$
+
+When looking at neural networks, we see a familiar form for a simple network with no hidden layers (these will be discussed further later). A neural network typically takes the form:
+
+$$
+Y = \begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
+                    \vdots & \ddots & \vdots \\
+                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
+$$
+
+There are two key differences between this form and the previous:
+
+-   There is no intercept in the NN formula, meaning the response is not necessarily being made relative to some base case
+
+-   Rather than a row vector of coefficients, we instead use a $n\times p$ matrix of weights. This is especially useful in capturing relationships between variables. Of course the result of this is no longer a single value, but a vector of length $q$ which for now is arbitrarily chosen.
+
+In order to return a single value as desired, we must again multiply the results of this equation by a row vector of length $q$.
+
+$$
+Y = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
+                    \vdots & \ddots & \vdots \\
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+$$
+
+Here we now have two matrices of weights, $W_1$ and $W_2$ which results in a scalar output $Y$.
+
+#### Attempt 2
+
+If we recall our GLM formula of
+
+$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+We can rewrite this in matrix notation as
+
+$$
+log(\mu) = \beta_0 + 
+\begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix}
+\begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
+$$
+
+Representing a full model of $p$ independent variables. However, for fitting a saturated model including all possible interactions, very quickly our number of variables grows to an unmanageable size. Computability, memory availability, and interpretability will all suffer. However, we can extend our set of coefficients into a matrix with an arbitrary amount of rows, say $q$ which each represent some relationship over all predictors. This will result in a formula that looks like
+
+$$
+           \begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
+                    \vdots & \ddots & \vdots \\
+                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
+           \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} 
+         = \begin{bmatrix} H_1 & \ldots & H_q\end{bmatrix} 
+$$
+
+This results in a vector of length $q$ which represents $q$ relationships from the model. Of course, as we desire a scalar output similar to how a GLM would produce, we would then need to multiply this by a column vector of length $q$ $$
+\hat{Y} = \begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
+                    \vdots & \ddots & \vdots \\
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+$$
+
+Where $\hat{Y}$ is our new scalar output and instead of one matrix of coefficients $W$ we have $W_1$ and $W_2$. It may also at this stage be helpful to make an adjustment similar to what we do for interpreting GLMs where
+
+$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+And after getting the exponential of both sides, this becomes equivalent to
+
+$$\mu = exp(\beta_0 + \beta_1X_1 +...+ \beta_pX_p)$$
+
+And applying this to our matrix notation we now get
+
+$$
+\hat{Y} = exp\left(\begin{bmatrix}\begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\ 
+                    \vdots & \ddots & \vdots \\
+                    W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+    \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}\end{bmatrix}
+    \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}\right)
+$$ It is clear that with the nesting of these processes, the architecture becomes very difficult to understand. We can write this in a more sequential pattern as following:
+
+$$
+  \begin{bmatrix} W_{1,11} & \ldots & W_{2,1p} \\
+                  \vdots & \ddots & \vdots \\
+                  W_{1,q1} & \ldots & W_{1,qp}\end{bmatrix} 
+  \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix}
+                = \begin{bmatrix} H_{1,1} \\ \vdots \\ H_{1,q} \end{bmatrix}
+\Rightarrow
+           \begin{bmatrix} H_1 \\ \vdots \\ H_q \end{bmatrix}
+    \times \begin{bmatrix} W_{2,1} & \ldots & W_{2,q}\end{bmatrix}
+    = H_2
+\Rightarrow
+    \exp(H_2)
+    = \hat{Y}
+$$
+
+This can be made even clearer visually by representing vectors and matrices as nodes in a network, and producing a computation graph.
+
+```{=tex}
+\begin{figure}
+    \centering
+      \begin{tikzpicture}[>=stealth, node distance=1.5cm, every node/.style={scale=0.8}]
+      % Input layer
+      \node[circle, draw, fill=yellow!20] (X) at (0,-1) {$X$};
+      \node[circle, draw, fill=blue!20] (W1) at (0,-2) {$W_1$};
+      
+      \node[circle, draw, fill=red!20] (H1) at (2,-1) {$H_1$};
+      \node[circle, draw, fill=green!20] (star1) at (1,-1) {$*$};
+      
+      % Labels
+      \node[above=0.5cm of X] {Input Layer};
+      
+      % Connect Nodes
+      \draw[->] (X) -- (star1);
+      \draw[->] (W1) -- (star1);
+      \draw[->] (star1) -- (H1);
+      
+      % First Hidden Layer
+      \node[circle, draw, fill=blue!20] (W2) at (2,-2) {$W_2$};
+      
+      \node[circle, draw, fill=red!20] (H2) at (4,-1) {$H_2$};
+      \node[circle, draw, fill=green!20] (star2) at (3,-1) {$*$};
+      
+      % Connect Nodes
+      \draw[->] (W2) -- (star2);
+      \draw[->] (H1) -- (star2);
+      
+      % Final Layer
+      \node[circle, draw, fill=green!20] (link) at (5,-1) {$exp$};
+      \node[circle, draw, fill=yellow!20] (output) at (6,-1) {$\hat{Y}$};
+      
+      % Connect Nodes
+      \draw[->] (star2) -- (H2);
+      \draw[->] (H2) -- (link);
+      \draw[->] (link) -- (output);
+    
+    \end{tikzpicture}
+    \caption{Computation Graph of Adapted GLM??}
+    \label{fig:simple_comp_graph}
+  \end{figure}
+```
+Where:
+
+-   The yellow nodes $X$, $\hat{Y}$ are the inputs and outputs of our model.
+
+-   The blue nodes $W_1$ and $W_2$ are our matrices of weights.
+
+-   The green nodes are functions, where an incoming arrow indicates inputs and outgoing indicates output.
+
+-   The red nodes are intermediary steps, where the output of a previous function is the input of a subsequent function. *Note: These are displayed here as a visual aid to relate to previous formulae. In practice, these are not necessarily saved nor important, and will cease to be used in future diagrams. They are useful to visualise the concept of "hidden layers", but really this applies more to the functions either side of where these are shown.*
+
+#### Loss Function vs MLE
+
+The parameters $\beta$ in a GLM are found by maximising their likelihood function given the data. Given that we are assuming a poisson distribution, this likelihood function is just the product of the pdfs of the observations.
+
+$$
+L(\beta|y) = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}
+$$
+
+Where $\mu_i = exp(\beta_0 + \beta_1X_{i,1} + \ldots + \beta_pX_{i,p})$. We can now take the log likelihood
+
+$$
+L(\beta|y)  = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}\\
+\ell(\beta|y)   = \sum^n_{i=1} log( \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!})\\
+             = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) - log(y_i!)
+$$
+
+Seeing as $log(y_i!)$ is independent of our parameters we can ignore this when maximising the function, leaving us with:
+
+$$
+\ell(\beta|y) = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i)
+$$
+
+It is clear that for a large GLM with many predictor variables in $\mu_i$, calculating each step in this function for every observation becomes very expensive. Because of this optimisation functions are employed. These include (the R default) Iteratively Weighted Least Squares (IWLS), Stochastic Gradient Descent (SCG), Newton-Raphson and Fisher Scoring Iteration.
+
+When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly. This loss function is obtained identically to the Maximum Likelihood Estimate for the GLM where we have
+
+$$
+\ell(\lambda|y) = \sum^n_{i=1}-\lambda_i + y_ilog(\lambda_i)
+$$
+
+In this case where $\lambda$ is the latest model output. However instead of maximising this function we want to minimise it, which is equivalent to maximising the negative of this function.
+
+$Loss = \lambda + ylog(\lambda)$
+
+*These are calculated in batches of 512/1024 for computational efficiency, here* $\lambda$ *and* $y$ *are to be* *understood as vectors with length of batchsize. Could just be written as sum as well.*
+
+Once again, computational constraints require that some method is used to optimise this process, for NNs these include SCG again, Adam, etc.
+
+It can be shown that there is no mathematical difference in what a simple NN of 0 hidden layers with exponential activation function produces and that of a GLM, though they're may be computational differences.
+
+### Aside
+
+*Not sure if this is of any use, but took a while to write out so I've left it here*
+
+```{=tex}
+ \begin{align*} LSE(\beta_0, \beta_1 | y_i) & = \sum^n_{i=1}(y_i-\hat{y_i})^2 \\ & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\ MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\mu_i = \beta_0+\beta_1Xi|y_i) \\ & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \\  MLE(\beta_0,\beta_1|y_i) & = \arg\max_{\beta_0,\beta_1}\mathcal{L}(\theta_i = g(\mu_i) = \beta_0   +\beta_1Xi|y_i)\tag{*}  \\  & = \sum^n_{i=1}(y_i-(\beta_0+\beta_1x_i))^2 \end{align*}
+```
+For a poisson distribution we denote the means by $\lambda_i$, and we have found that $\theta_i = \log(\lambda_i)$ and can rewrite (\*) as
+
+```{=tex}
+\begin{align*} MLE(\beta_0, \beta_1|y_i) & = \arg\max_{\beta_0,\beta_1} \mathcal{L}(\theta_i=g(\lambda_i) = \log(\lambda_i) = \beta_0+\beta_1x_i|y_i) \\ & = \sum^n_{i=1}y_i\theta_i + \exp(\theta_i) + \log(y_i!) \tag{from (**)}\\ & = \sum_{i=1}^ny_i\log(\lambda_i) - \lambda_i +\log(y_i!) \end{align*}
+```
