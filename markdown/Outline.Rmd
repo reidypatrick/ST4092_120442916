@@ -1,0 +1,130 @@
+# Outline
+
+## Linear Regression
+
+Linear regression dates back to the early 19th century as a method for modellin the relationship between two variables, $Y$ and $X$. They operate on three key assumptions:
+
+1.  The observations or the $y_is$ are independent
+
+2.  The observations are normally distributed with $y_i \sim N(\mu_i, \sigma^2)$
+
+3.  $\mu_i = X_i^T\beta = \beta_0 + \sum_{i=1}^n \beta_iX_i$
+
+With this we can create a model of $Y$ of the form:
+
+$$
+Y = \beta_0 + \sum^n_{i=1}\beta_iXi
+$$
+
+These $\beta$ parameters are determined using a Least Squares Estimate (LSE)
+
+$$
+\min \sum^n_{i=1}(y_i-\mu_i)^2 = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^n_{i=1}\beta_iXi))^2
+$$
+
+## Generalised Linear Models
+
+Generalised Linear Models (GLMs) were an extension or in fact as the name suggests a generalisation of this form to all distributions in the Exponential Dispersion Family (EDF) which expanded the assumption such that:
+
+1.  The observations or the $y_is$ are independent
+
+2.  $y_i \sim$ Exponential Dispersion Family, which take the form:
+
+    $$
+    f(y) = \exp(\frac{1}{a(\phi}(y\theta-b(\theta)) + c(y,\phi)
+    $$
+
+3.  There is some $g(\mu_i) = X_i^T\beta = \beta_0 + \sum_{i=1}^n \beta_iX_i$
+
+What we find is that for distributions in this class, this function $g$, known as the link function can be derived from the form in assumption (2). For the poisson family, we find that this function is the $log$ function. Meaning we can construct a model of the form:
+
+$$
+log(\mu_i) = \beta_0 + \sum^n_{i=1}\beta_iXi
+$$
+
+We can take this to mean that while we can not fit a linear model to out target variable, we can fit a linear model to the log of our target variable.
+
+Another key difference was the use of a Maximum Likelihood Estimator (MLE) in place of an LSE. Of course for a Normal Distribution, these are the same. However, for other distributions in the EDF, this is not the case. We derive the MLE for a poisson distribution starting with the Likelihood function of the $\beta s$ given the true data as:
+
+$$ L(\beta|y) = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!} $$
+
+Where $\mu_i = exp(\beta_0 + \beta_1X_{i,1} + \ldots + \beta_pX_{i,p})$. We can now take the log likelihood
+
+$$ L(\beta|y)  = \prod^n_{i=1} \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!}\\ \ell(\beta|y)   = \sum^n_{i=1} log( \frac{e^{-\mu_i}\mu_i^{y_i}}{y_i!})\\              = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) - log(y_i!) $$
+
+Seeing as $log(y_i!)$ is independent of our parameters we can ignore this when maximising the function, leaving us with:
+
+$$ \ell(\beta|y) = \sum^n_{i=1}-\mu_i + y_ilog(\mu_i) $$
+
+It is clear that for a large GLM with many predictor variables in $\mu_i$, calculating each step in the maximisation function for every observation becomes very expensive. Because of this optimisation functions are employed. These include (the R default) Iteratively Weighted Least Squares (IWLS), Stochastic Gradient Descent (SCG), Newton-Raphson and Fisher Scoring Iteration. These are all different methods of finding the optimal $\beta$ in order to maximise likelihood.
+
+## Neural Networks
+
+Neural Networks (NNs), while possibly theorised in the mid 20th century, only began realising their potential in recent decades, as computational resources began to enable the architecture to outperform classical statistical models. A neural network consists of multiple layers, each containing nodes. Typically, a NN will have an input layer, which takes in a vector of inputs, multiplies this with a matrix of weights, adds a bias term to each output, and then applies an activation function which is used to capture non-linearity in the data, much like we have seen with the link function in GLMs, namely the log function in the context of Poisson GLMs. This yields
+
+$$ \hat{y} = 
+\begin{bmatrix} W_{11} & \ldots & W_{1p} \\ 
+                    \vdots & \ddots & \vdots \\
+                    W_{q1} & \ldots & W_{qp}\end{bmatrix} 
+  \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} 
++ \begin{bmatrix}b_1 \\ \vdots \\ b_p\end{bmatrix}
+$$
+
+$$
+Y = [WX+b \Rightarrow Activation Function]
+$$
+
+Where:
+
+-   Y is the target or response variable
+
+-   X is the vector of predictor variables, say of length $p$
+
+-   W is the matrix of weights, with $p$ columns and say some arbitrary $q$ rows.
+
+-   $ActivationFunction$ is some function that augments the result to capture non-linearity.
+
+This form only applies to the input layer of the model, as the resultant value(s) would then be fed into a "hidden" layer, where this procedure $WX+b \Rightarrow ActivationFunction$ is again applied, except X is now the output of the previous layer. As may already be clear, it can become quite cumbersome to notate this process, and so NNs are often visualised with computation graphs, one of which for a NN with a typical structure can be seen below:
+
+```{r, figDummyCompGraph, results="asis", echo=FALSE}
+cat(get_computation_graph_tex(
+  act_funs = c("", "", ""),
+  name = "figDummyCompGraph"
+))
+```
+
+Where:
+
+-   The yellow nodes $X$, $\hat{y}$ are the inputs and outputs of our model respectively, while $y$ is the true value of the target variable.
+
+-   The blue nodes $W_1$ and $W_2$ are our matrices of weights.
+
+-   The green nodes are functions, where an incoming arrow indicates inputs and outgoing indicates output.
+
+-   The red nodes are the activation functions, which capture the non-linearity in the model.
+
+When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly. This loss function is obtained identically to the Maximum Likelihood Estimate for the GLM where we have
+
+$$ \ell(\lambda|y) = \sum^n_{i=1}-\lambda_i + y_ilog(\lambda_i) $$
+
+In this case where $\lambda$ is the latest model output. However instead of maximising this function we want to minimise it, which is equivalent to maximising the negative of this function.
+
+$Loss = \lambda + ylog(\lambda)$
+
+*These are calculated in batches of 512/1024 for computational efficiency, here* $\lambda$ *and* $y$ *are to be* *understood as vectors with length of batchsize. Could just be written as sum as well.*
+
+Once again, computational constraints require that some method is used to optimise this process, for NNs these include SCG again, Adam, etc.
+
+## Bringing it All Together
+
+If we recall our GLM formula of
+
+$$log(\mu) = \beta_0 + \beta_1X_1 +...+ \beta_pX_p$$
+
+We can rewrite this in matrix notation as
+
+$$ log(\mu) = \beta_0 +  \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} $$
+
+We can rearrange this as:
+
+$$ log(\mu) = \begin{bmatrix} \beta_1, \ldots, \beta_p\end{bmatrix} \begin{bmatrix} X_1 \\ \vdots \\ X_p\end{bmatrix} + \beta_0 $$
