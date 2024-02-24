@@ -110,7 +110,7 @@ EDF
 
 The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
-Classical linear regression is the earliest and simplest form of modelling [@su_2012_linear] and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+Classical linear regression is the earliest and simplest form of modelling and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
 Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised. *TODO: expand!*
 
@@ -483,7 +483,8 @@ cat(get_network_tex(
   "figIntroNetwork",
   n_input = "p",
   n_hidden1 = "q",
-  n_hidden2 = "q"))
+  n_hidden2 = "q"
+))
 ```
 
 ```{=tex}
@@ -849,7 +850,7 @@ train <- training(cars_split)
 test <- testing(cars_split)
 ```
 
-Using the basic stats \@[@stats-3] implementation of GLMs, one can fit a model with the following:
+Using the basic R implementation [@stats-3] of GLMs, one can fit a model with the following:
 
 ```{r glmFit, include  = TRUE, echo=TRUE}
 glm1 <- glm(ClaimNb ~ .,
@@ -912,8 +913,8 @@ cat(
 
 Alternatively for more robust feature selection one can use backwards elimination
 
-```{r glmBackElimEcho, include = FALSE, echo = TRUE}
-# backward_elimination <- stats::step(glm1, direction = "backward")
+```{r glmBackElimEcho, echo = TRUE, eval = FALSE}
+backward_elimination <- stats::step(glm1, direction = "backward")
 ```
 
 ```{r glmBackElim, include = TRUE, echo = FALSE}
@@ -1172,6 +1173,8 @@ o Recommendations
 -->
 ```
 # Conclusion
+
+\newpage
 
 # References {.unnumbered}
 
