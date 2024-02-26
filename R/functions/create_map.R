@@ -1,4 +1,4 @@
-create_map <- function(.data = cars_orig, .col, .shape = shape) {
+create_map <- function(.data, .col, .shape) {
   # Defaults to using cars_orig and france shapefile
   # also defaults to sum
 
