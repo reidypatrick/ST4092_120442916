@@ -317,9 +317,9 @@ Note: Once again, this form can be extended for multiple predictor variables $x$
 
 $$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
 
-In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Dispersion Family (EDF).
+In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Distribution Family (EDF).
 
-## Exponential Dispersion Family {.unnumbered}
+## Exponential Distribution Family {.unnumbered}
 
 Nelder and Wedderburn @nelder_1972_generalized devised a method for generalising the above form, by first generalising the pdf and the notion of a family of distributions. This family takes the form
 
@@ -834,7 +834,7 @@ boxplot(data = cars_orig, Exposure ~ VehBrand)
 
 ```{r figVehPower, out.width = "33%", out.ncol = 3, fig.cap = "VehPower", fig.subcap=c("VehPower by Region", "Histogram of VehPower", "Boxplot of VehPower")}
 create_map(cars_orig, VehPower, shape, source_or_run = "run")
-hist(cars_orig$VehPower, main = "")
+hist(cars_orig$VehPower, main = "", xlab = "")
 boxplot(cars_orig$VehPower)
 
 ```
@@ -843,7 +843,7 @@ boxplot(cars_orig$VehPower)
 
 ```{r figVehAge, out.width = "33%", out.ncol = 3, fig.cap = "VehAge", fig.subcap=c("VehAge by Region", "Histogram of VehAge", "Boxplot of VehAge")}
 create_map(cars_orig, VehAge, shape, source_or_run = "run")
-hist(cars_orig$VehAge, main = "")
+hist(cars_orig$VehAge, main = "", xlab = "")
 boxplot(cars_orig$VehAge)
 ```
 
@@ -851,7 +851,7 @@ boxplot(cars_orig$VehAge)
 
 ```{r figDrivAge, out.width = "33%", out.ncol = 3, fig.cap = "DrivAge", fig.subcap=c("DrivAge by Region", "Histogram of DrivAge", "Boxplot of DrivAge")}
 create_map(cars_orig, DrivAge, shape, source_or_run = "run")
-hist(cars_orig$DrivAge, main = "")
+hist(cars_orig$DrivAge, main = "", xlab = "")
 boxplot(cars_orig$DrivAge, main = "")
 ```
 
