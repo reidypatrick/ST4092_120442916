@@ -12,7 +12,7 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: TRUE
+    keep_tex: FALSE
     toc: FALSE
     extra_dependencies: ["subfig", "tikz", "float"]
   author:
@@ -41,7 +41,7 @@ csl: https://www.zotero.org/styles/ieee
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(paged.print = TRUE)
-knitr::opts_chunk$set(fig.path = "data/figures")
+knitr::opts_chunk$set(fig.path = "data/figures/")
 knitr::opts_chunk$set(fig.pos = "H", out.extra = "")
 
 library(OpenML)
@@ -579,7 +579,7 @@ cat(get_network_tex(
   \label{fig:figIntroDummyCompGraph}
 \end{figure}
 ```
-Above can be seen two representations of the architecture underlying NNs. Figure \ref{fig: figIntroNetwork } shows the fully connected network, with two hidden layers. Figure \ref{fig:figIntroDummyCompGraph} shows the computation graph where:
+Figure \ref{fig: figIntroNetwork } and Figure \ref{fig:figIntroDummyCompGraph} are two helpful visualisations of NNs. Figure \ref{fig: figIntroNetwork } shows the fully connected network, with two hidden layers. Figure \ref{fig:figIntroDummyCompGraph} shows the computation graph where:
 
 -   $X$ is a vector of predictor variables
 
@@ -591,7 +591,7 @@ Above can be seen two representations of the architecture underlying NNs. Figure
 
 -   The final two yellow nodes are our prediction $\hat{y_i}$ and the ground truth $y_i$, which are used to calculate the loss function.
 
-It will eventually be seen how we arrive at this model, but firstly, we consider a NN at its simplest. We define a NN with 0 hidden layers, and some activation function $f$. Visualised in a similar fashion to \@ref(fig:figIntroDummyCompGraph) we get
+It will eventually be seen how we arrive at this model, but firstly, we consider a NN at its simplest. We define a NN with 0 hidden layers, and some activation function $f$. Visualised in a similar fashion to Figure \@ref(fig:figIntroDummyCompGraph) we get
 
 ```{=tex}
 \begin{figure}
@@ -765,7 +765,7 @@ cars_orig %>%
   summary() %>%
   knitr::kable(
     format = "latex", booktabs = TRUE,
-    caption = "Summary of Variables in Data"
+    caption = "Summary of Numeric Variables in Data"
   ) %>%
   kable_styling(latex_options = "scale_down") %>%
   kable_styling(latex_options = "HOLD_position") %>%
@@ -777,6 +777,7 @@ cars_orig %>%
 ```{r setup_fig, echo=FALSE}
 wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
 dsn <- file.path(wd, "data/input/shapefile")
+shape <- shapefile(file.path(dsn, "FRA_adm1.shp"))
 ```
 
 Before investigating the performance of the models, we carry out a number of investigations regarding the structure and behaviour of the data. This is important in identifying which methods to use, issues to address and results to expect.
@@ -791,11 +792,99 @@ As ClaimNb is the response variable it is no doubt the most important variable t
 
 \newpage
 
-<center>
+### ClaimNb {.unnumbered .unlisted}
+
+```{r figClaimNb, out.width="33%", out.ncol = 3, fig.cap="ClaimNb", fig.subcap = c("ClaimNb by Region", "Histogram of ClaimNb", "Boxplot of ClaimNb")}
+create_map(cars_orig, ClaimNb, shape, source_or_run = "run")
+hist(cars_orig$ClaimNb, main = "", xlab = "")
+boxplot(cars_orig$ClaimNb)
+```
+
+### Exposure {.unnumbered .unlisted}
+
+```{r figExposure, out.width = "33%", out.ncol = 3, fig.cap = "Exposure", fig.subcap=c("Exposure by Region", "Histogram of Exposure", "Boxplot of Exposure")}
+create_map(cars_orig, Exposure, shape, source_or_run = "run")
+hist(cars_orig$Exposure, main = "", xlab = "")
+boxplot(cars_orig$Exposure)
+```
+
+### Region {.unnumbered .unlisted}
+
+```{r figRegion, out.width = "50%", out.ncol = 2, fig.cap = "Region", fig.subcap = c("ClaimNb by Region", "Exposure by Region")}
+boxplot(data = cars_orig, ClaimNb ~ Region)
+boxplot(data = cars_orig, Exposure ~ Region)
+boxplot(data = cars_orig, Exposure ~ Region)
+```
+
+### Area {.unnumbered .unlisted}
+
+```{r figArea, out.width = "50%", out.ncol = 2, fig.cap = "Area", fig.subcap = c("ClaimNb by Area", "Exposure by Area")}
+boxplot(data = cars_orig, ClaimNb ~ Area)
+boxplot(data = cars_orig, Exposure ~ Area)
+```
+
+### VehBrand {.unnumbered .unlisted}
+
+```{r figVehBrand, out.width = "50%", out.ncol = 2, fig.cap = "VehBrand", fig.subcap = c("ClaimNb by VehBrand", "Exposure by VehBrand")}
+boxplot(data = cars_orig, ClaimNb ~ VehBrand)
+boxplot(data = cars_orig, Exposure ~ VehBrand)
+```
+
+### VehPower {.unnumbered .unlisted}
+
+```{r figVehPower, out.width = "33%", out.ncol = 3, fig.cap = "VehPower", fig.subcap=c("VehPower by Region", "Histogram of VehPower", "Boxplot of VehPower")}
+create_map(cars_orig, VehPower, shape, source_or_run = "run")
+hist(cars_orig$VehPower, main = "")
+boxplot(cars_orig$VehPower)
+
+```
+
+### VehAge {.unnumbered .unlisted}
+
+```{r figVehAge, out.width = "33%", out.ncol = 3, fig.cap = "VehAge", fig.subcap=c("VehAge by Region", "Histogram of VehAge", "Boxplot of VehAge")}
+create_map(cars_orig, VehAge, shape, source_or_run = "run")
+hist(cars_orig$VehAge, main = "")
+boxplot(cars_orig$VehAge)
+```
+
+### DrivAge {.unnumbered .unlisted}
+
+```{r figDrivAge, out.width = "33%", out.ncol = 3, fig.cap = "DrivAge", fig.subcap=c("DrivAge by Region", "Histogram of DrivAge", "Boxplot of DrivAge")}
+create_map(cars_orig, DrivAge, shape, source_or_run = "run")
+hist(cars_orig$DrivAge, main = "")
+boxplot(cars_orig$DrivAge, main = "")
+```
+
+### BonusMalus {.unnumbered .unlisted}
+
+```{r figBonusMalus, out.width = "33%", out.ncol = 3, fig.cap = "BonusMalus", fig.subcap=c("BonusMalus by Region", "Histogram of BonusMalus", "Boxplot of BonusMalus")}
+create_map(cars_orig, BonusMalus, shape, source_or_run = "run")
+hist(cars_orig$BonusMalus, main = "")
+boxplot(cars_orig$BonusMalus)
+```
+
+### Density {.unnumbered .unlisted}
+
+```{r figDensity, out.width = "33%", out.ncol = 3, fig.cap = "Density", fig.subcap=c("Density by Region", "Histogram of Density", "Boxplot of Density")}
+create_map(cars_orig, Density, shape, source_or_run = "run")
+hist(cars_orig$Density, main = "")
+boxplot(cars_orig$Density)
+```
+
+\newpage
+
+| Variable | Preprocessing Steps |
+|----------|---------------------|
+| ClaimNb  | Truncated to 5      |
+| Exposure | Truncated to 1      |
+
+: List of Preprocessing Steps
 
 <center>
 
-```{r figCor, echo=FALSE, fig.cap = "Correlation Heatmap of Features", fig.path = "data/figures/"}
+<center>
+
+```{r figCor, include = FALSE, eval = FALSE, fig.cap = "Correlation Heatmap of Features"}
 par(mfrow = c(1, 1))
 cars_orig %>%
   mutate(across(where(is.factor), ~ as.numeric(unclass(.)))) %>%
