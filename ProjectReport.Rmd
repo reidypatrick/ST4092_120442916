@@ -128,7 +128,9 @@ To understand these models, we will first begin with the simplest form of modell
 
 Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
 
-## Simple Linear Regression {.unnumbered}
+# Regression Modelling
+
+## Simple Linear Regression 
 
 Simple linear regression is a method of modelling the linear relationship between two random variables, say $X = (x_1,...,x_i,...x_n)$ and $Y = (y_1, ..., y_i, ...y_n)$. We represent this relationship as a line where
 
@@ -211,7 +213,7 @@ Where i = 1,...,n.
 
 However, for the time being, it will be assumed there is only one predictor variable $x$ for ease of notation.
 
-## Maximum Likelihood Estimator {.unnumbered}
+### Maximum Likelihood Estimator 
 
 A different approach lies in understanding that often we can assume the following:
 
@@ -319,7 +321,7 @@ $$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
 
 In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Distribution Family (EDF).
 
-## Exponential Distribution Family {.unnumbered}
+## Exponential Distribution Family
 
 Nelder and Wedderburn @nelder_1972_generalized devised a method for generalising the above form, by first generalising the pdf and the notion of a family of distributions. This family takes the form
 
@@ -385,7 +387,7 @@ $$
 
 With the combined notions of the MLE and the EDF, we can generalise this process to work for any distribution in the EDF.
 
-## Generalised Linear Models {.unnumbered}
+## Generalised Linear Models
 
 ```{r figGLMMLE, fig.cap = "Non-linear Model"}
 set.seed(09022024)
@@ -472,9 +474,9 @@ In the terminology of @nelder_1972_generalized, a GLM is made up of two componen
 ```{=tex}
 \begin{equation} g(\mu_i) = \beta_0 + \sum^p_{j=1}\beta_jx_{ij} (\#eq:GLM) \end{equation}
 ```
-## Neural Networks
+# Neural Networks
 
-### Structure
+## Structure
 
 Neural Networks (NNs), while possibly theorised in the mid 20th century, only began realising their potential in recent decades, as computational resources began to enable the architecture to outperform classical statistical models. As discussed in @lu2020universal, a two layer "deep" NN is sufficient in the context of most problems. The architecture for such networks can be seen below.
 
@@ -658,7 +660,7 @@ And recalling our general form of our GLM \@ref(eq:GLM)
 ```
 It can be concluded that our simple NN contains both components of a GLM, namely the random component in the form of $g(\mu_i) = f^{-1}(y_i)$, or the inverse of our activation function, and the systematic component $\beta_0 + \sum^p_{j=1}\beta_jx_{ij} = b + \sum^p_{j=1}W_jx_{ij}$. It remains however to discuss in detail how the trainable parameters in NNs are calculated.
 
-### Loss Function
+## Loss Function
 
 When dealing in Neural Networks, a loss function is used to evaluate the error in the model iteration, which is then minimised by propagating this error backwards through the network, calculating the gradient of the error with respect to each of the weights, and then updating the weights accordingly.
 
