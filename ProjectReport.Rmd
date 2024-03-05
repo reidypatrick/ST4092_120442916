@@ -151,7 +151,7 @@ Several Assumptions are adopted in actuarial rating methods, for example in TPL 
 
 -   Homogeneity
 
-    -   While the data as a whole might not be homogeneous, we assume the response from policies in the *same risk category* are, and given they have the same exposure, we then assume that they are from the same probability distribution
+    -   While the data as a *whole* might not be homogeneous, we assume the response from policies in the *same risk category* are, and given they have the same exposure, we then assume that they are from the same probability distribution
 
 This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information. It is also important to note that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for. It is also accounted for as this applies across all risk categories equally.
 
@@ -164,7 +164,7 @@ This assumption of homogeneity is perhaps the most violated, as although policyh
 
 : Important Ratios/Metrics for Insurance Pricing
 
-Generally, ratio of same type i.e. an outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk.
+Generally, these ratios are some outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk, and the outcome is the number of claims they make in that period. This ratio of claim frequency will be the focus of this investigation.
 
 # Background
 
@@ -250,8 +250,8 @@ When dealing in one observation, where we have that $y_i \sim N(\mu_i, \sigma^2)
 
 ```{=tex}
 \begin{align*}
-MLE(\beta | y_i) & = \min\sum(y_i-\mu_i)^2 \\
-MLE(\beta | y_i) & = \min\sum(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2
+MLE(\beta) & = \min\sum(y_i-\mu_i)^2 \\
+MLE(\beta) & = \min\sum(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2
 \end{align*}
 ```
 ## Exponential Distribution Family {#ExponentialDistributionFamily}
