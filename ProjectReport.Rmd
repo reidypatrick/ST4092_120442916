@@ -108,6 +108,11 @@ EDF
 
 # Abstract
 
+
+\clearpage
+
+# Introduction
+
 The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, with a transition from traditional regression methods to more sophisticated models such as Generalized Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
 Classical linear regression is the earliest and simplest form of modelling and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
@@ -116,9 +121,9 @@ Deep Learning models have recently taken industries across the world by storm, n
 
 The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance *TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
-\clearpage
 
-# Introduction
+
+# Background
 
 Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. This risk is evaluated using statistical models that use factors related to the risk. For example, in the context of car insurance, the profiles of both the driver and the car impact how risk is considered and priced.
 
@@ -127,8 +132,6 @@ Insurance providers are constantly searching for ways to improve and gauge the p
 To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression. However, in the case of car insurance, linear regression is not appropriate, as in its simplicity it can not reflect the spread of our data, nor the complex non-linear relationships between the selected risk factors and insurance claims. We will therefore introduce two concepts, namely Maximum Likelihood Estimation and the Exponential Distribution Family, to see how this model can be expanded to a more versatile family of models called Generalised Linear Models. This will yield a great deal of information as to the risk associated with an insurance profile. Furthermore, these models will then be again extended and generalised to produce an even more powerful modelling architecture: Neural Networks.
 
 Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
-
-# Regression Modelling
 
 ## Simple Linear Regression 
 
