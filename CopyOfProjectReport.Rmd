@@ -12,7 +12,7 @@ email: "120442916@umail.ucc.ie"
 output: 
   bookdown::pdf_document2:
     fig_crop: no
-    keep_tex: FALSE
+    keep_tex: TRUE
     toc: FALSE
     extra_dependencies: ["subfig", "tikz", "float"]
   author:
@@ -66,6 +66,12 @@ cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 
 \newpage
 
+# Abstract {.unlisted .unnumbered}
+
+\clearpage
+
+\newpage
+
 \tableofcontents
 
 \newpage
@@ -106,19 +112,21 @@ EDF
 
 \newpage
 
-# Abstract
-
-\clearpage
-
 # Introduction
-
-The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, as the capacity of statistical models have advanced from classical regression methods to more sophisticated models such as Generalised Linear Models (GLMs) and, most recently, Deep Learning (DL) models.
 
 Insurance is a transaction where risk is transferred from the policyholder to the insurer, in return for the premium paid by the policyholder.
 
-Insurance pricing is a problem in risk assessment. A policyholder purchases a policy to cover them for a period of time, so that in the event of unpredictable losses and damages, they are covered financially. In order to evaluate the necessary premium charged by the insurer, the risk posed by the policy holder must be evaluated. Statistical models are used to determine this risk, namely regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
+Insurance pricing is a problem in risk assessment. A policyholder purchases a policy to cover them for a period of time, so that in the event of unpredictable losses and damages, they are covered financially. In order to evaluate the necessary premium charged by the insurer, the risk posed by the policyholder must be evaluated.
 
-Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry.
+The insurance premium is usually derived from an annual frequency of claims , which is modeled by using statistical data. The annual frequency of claims is calculated from the number of claims on a contract. Thus consideration of factors that influence loss frequency, the risk-taking and risk-reducing behaviour of individuals and companies is crucial. Explanatory (rating) variables can have different effects on models of how often an event occurs.\
+\
+Explanatory variables include age, vehicle type. Prior claims history is also important as a risk classification factor.
+
+Statistical models are used to determine this risk in particular by means of regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
+
+The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, as the capacity of statistical models have advanced from classical regression methods to more sophisticated models such as Generalised Linear Models (GLMs) and, most recently, Deep Learning (DL) models. Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry.
+
+Third Party Liability (TPL) insurance is that which protects the first party (the policyholder) from legal liability to a third party. This will cover the policyholder in the event that they are at fault for any damages and losses owed to the third party, which here is the other driver in the accident. In this paper we will discuss a particular dataset of French Motor TPL claims, which is further discussed in Section \@ref(data-collection).
 
 Regression modelling refers to the process of fitting explanatory variables to a numerical value.
 
@@ -133,6 +141,31 @@ The transition from GLMs to Deep Learning is not without its challenges. While D
 3.  *Insurance risk selection refers to process by which insurers decide whether to insure an individual and the premium to charge*
 4.  *Car insurance is an insurance designed to offer financial protection... Insurance premiums are usually derived from statistical modelling of annual frequencies of claims.*
 
+Several Assumptions are adopted in actuarial rating methods, for example in TPL insurance
+
+-   All individual claims are independent meaning
+
+    -   Independence of policies
+
+    -   Time Independence *Expand*
+
+-   Homogeneity
+
+    -   While the data as a whole might not be homogeneous, we assume the response from policies in the *same risk category* are, and given they have the same exposure, we then assume that they are from the same probability distribution
+
+This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information. It is also important to note that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for. It is also accounted for as this applies across all risk categories equally.
+
+| Exposure (E)  | Response (Y)  | Ratio (X)       |
+|---------------|---------------|-----------------|
+| Duration      | No. of Claims | Claim Frequency |
+| Duration      | Claim Cost    | Pure Premium    |
+| No. of Claims | Claim Cost    | Claim Severity  |
+| Premium Inc   | Claim Cost    | Loss Ratio      |
+
+: Important Ratios/Metrics for Insurance Pricing
+
+Generally, ratio of same type i.e. an outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk.
+
 # Background
 
 The process of modelling involves first the collection of data, the subdivision of the data into risk groups using explanatory variables, and finally fitting these explanatory variables to the number of claims and interpreting the results.
@@ -141,33 +174,16 @@ For example, in car insurance, the profile of the driver and of the car are used
 
 Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. This risk is evaluated using statistical models that use factors related to the risk. For example, in the context of car insurance, the profiles of both the driver and the car impact how risk is considered and priced.
 
-To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression. We will use this a foundation on which to build and also address the limitations especially in the context of car insurance claims, where in practice heteroskedasticity occurs as we are not dealing with a normal distribution, but rather a Poisson distribution
+To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression. We will use this a foundation on which to build and also address the limitations especially in the context of car insurance claims, where in practice heteroskedasticity occurs as we are not dealing with a normal distribution, but rather a Poisson distribution.
+
+Regression modelling assumes a normal distribution, which in turn requires a symmetric density and homoskedastic variance. We will see in Section \@ref(GeneralisedLinearModels) and more demonstrably through the data in Section \@ref(DataAnalysis) how these assumptions do not fit our use case. Our data of claim numbers will be count data, meaning they are bounded by zero, discrete and heteroskedastic. These elements suggest that a Poisson distribution will be more appropriate. We will therefore introduce an expanded family of distributions, known as the Exponential Distribution Family, in Section \@ref(exponential-dispersion-family)
 
 We will therefore introduce the Exponential Distribution Family, a more general family of distributions of which the Normal and Poisson are members, to see how this model can be expanded to a more versatile family of models called Generalised Linear Models. This will yield a great deal of information as to the risk associated with an insurance profile. Furthermore, these models will then be again extended and generalised to produce an even more powerful modelling architecture: Neural Networks.
 
 Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
 
-## Regression Modelling
+## Regression Modelling {#regressionModelling}
 
-### Assumptions
-
-Simple Linear Regression is founded on
-
--   The predictor variables $X_1, ... X_p$ are independent
--   The observations $y_i$ are identically independent distributed where $y_i \sim N(\mu_i, \sigma^2)$
--   This $\mu_i$ can be estimated in the form $\mu_i = \beta_0 + \sum^p_{j=1}\beta_jX_{ij}$
--   There $y_is$ have constant variance $\sigma^2$ across all levels, i.e. homeskedasticity
-
-### Estimation
-
-When dealing in one observation, where we have that $y_i \sim N(\mu_i, \sigma^2)$ where $\mu_i = \beta_0 + \sum^p_{j=1}\beta_jX_{ij}$ we can use the probability distribution function of the Normal to evaluate the likelihood of that particular observation emerging from the distribution we have predicted. To do this for all observations we get the joint likelihood or the product of these individual likelihoods. When we consider that our $y_i's$ and $x_i's$ are all known and it is $\beta_0, ..., \beta_p$ that we are estimating, we consider this a function in the form
-
-```{=tex}
-\begin{align*}
-MLE(\beta | y_i) & = \min\sum(y_i-\mu_i)^2 \\
-MLE(\beta | y_i) & = \min\sum(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2
-\end{align*}
-```
 ```{r figLMMLE, fig.cap = "Linear Model: MLE", out.height="50%"}
 # Set seed for reproducibility
 set.seed(123)
@@ -219,93 +235,26 @@ legend(
 )
 ```
 
-Simple linear regression is a method of modelling the linear relationship between two random variables, say $X = (x_1,...,x_i,...x_n)$ and $Y = (y_1, ..., y_i, ...y_n)$. We represent this relationship as a line where
+### Assumptions
 
-$$
-\hat{Y} = \beta_0 + \beta_1X \\
-$$
+Simple Linear Regression works with the following assumptions:
 
-Or for each observation
+-   The predictor variables $X_1, ... X_p$ are independent
+-   The observations $y_i$ are identically independent distributed where $y_i \sim N(\mu_i, \sigma^2)$
+-   This $\mu_i$ can be estimated in the form $\mu_i = \beta_0 + \sum^p_{j=1}\beta_jX_{ij}$
+-   There $y_is$ have constant variance $\sigma^2$ across all levels, i.e. homeskedasticity
 
-$$
-\hat{y_i} = \beta_0 + \beta_1x_i
-$$
+### Estimation
 
-Where $\hat{Y} = (\hat{y_1}, ..., \hat{y_n})$ are our predicted $y_i$ values based on the corresponding $x_i$ and $\beta_0$ is the intercept term, and $\beta_1$ is the slope coefficient.
-
-Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also included are the green lines, which represent the difference between the prediction and the true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate (LSE) of our regression parameters $\beta_0$, $\beta_1$:
-
-$$
-LSE(\beta) = \min\sum(y_i-\hat{y}_i)^2
-$$
-
-Recalling that
-
-$$\hat{y_i} = \beta_0 + \beta_1x_i$$ We can write this as
+When dealing in one observation, where we have that $y_i \sim N(\mu_i, \sigma^2)$ where $\mu_i = \beta_0 + \sum^p_{j=1}\beta_jX_{ij}$ we can use the probability distribution function of the Normal to evaluate the likelihood of that particular observation emerging from the distribution we have predicted. To do this for all observations we get the joint likelihood or the product of these individual likelihoods. When we consider that our $y_i's$ and $x_i's$ are all known and it is $\beta_0, ..., \beta_p$ that we are estimating, we consider this a function in the form of a Maximum Likelihood Estimator (MLE)
 
 ```{=tex}
-\begin{equation} LSE(\beta) = \min\sum(y_i-(\beta_0+\beta_1x_i))^2 (\#eq:LSE) \end{equation}
+\begin{align*}
+MLE(\beta | y_i) & = \min\sum(y_i-\mu_i)^2 \\
+MLE(\beta | y_i) & = \min\sum(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2
+\end{align*}
 ```
-Now we can find, using partial derivatives, the $\beta_0$ and $\beta_1$ that minimise this value.
-
-This can also be extended for Multiple Linear Regression, where we have more than one predictor variable $x$, and instead we use the formula
-
-Where i = 1,...,n.
-
-However, for the time being, it will be assumed there is only one predictor variable $x$ for ease of notation.
-
-A different approach lies in understanding that often we can assume the following:
-
-1.  The observations $y_i$ are independent
-
-2.  The observations are normally distributed with $y_i \sim N(\mu_i, \sigma^2)$
-
-3.  We can estimate these $\mu_i$ with a line of the form $\mu_i = \beta_0 + \beta_1X_i$
-
-Above is a representation of these assumptions, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
-
-$$
-\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
-$$
-
-To find the joint probability across all observations we get
-
-$$
-\prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
-$$
-
-But recall that $\mu_i = \beta_0+\beta_1x_i$, and we would like to maximise this probability with respect to the $\beta's$. We can write this as instead a likelihood function
-
-$$
-\mathcal{L}(\beta|Y) = \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}}
-$$
-
-We know that any $\beta$ that maximises this function also maximises the log likelihood function denoted $\ell(\beta|Y)$, which also helps in evaluating the right hand side
-
-$$
-\ell(\beta|Y) = \sum^n_{i=1} -\log(\sqrt{2\pi\sigma^2}) - \frac{(y_i - \mu_i)^2}{2\sigma^2}
-$$
-
-Seeing as we are only interested in terms here that relate to $\beta$ and $y_i$, we can ignore some terms and finally we have
-
-$$
-\ell(\beta|Y) = -\sum(y_i-\mu_i)^2
-$$
-
-We now want to maximise this value, but as it is a negative quantity, this is the same as minimising the negative of the function, and notate this as our Maximum Likelihood Estimator (MLE)
-
-If we replace $\mu_i$ with our linear model, we get
-
-```{=tex}
-\begin{equation} MLE(\beta) = \min\sum(y_i-(\beta_0 + \beta_1x_i)^2 (\#eq:MLE) \end{equation}
-```
-Note: Once again, this form can be extended for multiple predictor variables $x$, where it takes the form
-
-$$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
-
-In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Distribution Family (EDF).
-
-## Exponential Distribution Family
+## Exponential Distribution Family {#ExponentialDistributionFamily}
 
 Nelder and Wedderburn @nelder_1972_generalized devised a method for generalising the above form, by first generalising the pdf and the notion of a family of distributions. This family takes the form
 
@@ -371,7 +320,7 @@ $$
 
 With the combined notions of the MLE and the EDF, we can generalise this process to work for any distribution in the EDF.
 
-# Generalised Linear Models
+# Generalised Linear Models {#GeneralisedLinearModels}
 
 ```{r figGLMMLE, fig.cap = "Non-linear Model"}
 set.seed(09022024)
@@ -460,11 +409,47 @@ In the terminology of @nelder_1972_generalized, a GLM is made up of two componen
 ```
 ## Assumptions
 
+Now with the aid of the general form of the EDF, we can expand our regression model to a more generalised from, the GLM. Here the assumptions are as follows
+
+1.  The observations or the $y_is$ are independent
+
+2.  $y_i \sim$ Exponential Dispersion Family, which take the form:
+
+    $$
+    f(y) = \exp(\frac{1}{a(\phi)}(y\theta-b(\theta)) + c(y,\phi)
+    $$
+
+3.  There is some $g(\mu_i) = \beta_0 + \sum_{j=1}^p \beta_jX_{ij}$. That is we can fit some linear model to a function of the true mean of the probability distribution of each observation.
+
 ## Systematic Component
+
+The systematic component refers to the part that is familiar from our simple regression model, that is
+
+$$
+\beta_0 + \sum_{j=1}^p \beta_jX_{ij}
+$$
+
+Where we have ith observation and
+
+-   $\beta_0, ..., \beta_p$ are our regression parameters
+
+-   We have $p$ predictor variables or risk factors
 
 ## Random Component
 
+The random component refers to the left hand side of our equation $g(\mu_i)$. As we have shown in Section \@ref(ExponentialDistributionFamily), this can be shown to be the natural parameter $\theta$ and in our case for claim number counts, which have a Poisson distribution, this will be $\log(\mu_i)$. So for a Poisson GLM we will create a model of the form
+
+$$
+\log(\mu_i) = \beta_0 + \sum_{j=1}^p \beta_jX_{ij}
+$$
+
 ## Estimation
+
+We will once again be using the MLE to determine our regression parameters $\beta_0, ..., \beta_p$, however for a Poisson random variable we get the following MLE:
+
+$$
+MLE(\beta|Y) = \sum^n_{i=1} y_ilog(\mu_i) -\mu_i + log(y_i!)
+$$
 
 # Neural Networks
 
@@ -765,7 +750,7 @@ cars_orig %>%
   kable_styling(latex_options = "striped")
 ```
 
-## Data Analysis
+## Data Analysis {#DataAnalysis}
 
 ```{r setup_fig, echo=FALSE}
 wd <- file.path("C:/Users/patos/Documents/ST4092_120442916")
@@ -1038,7 +1023,7 @@ summary(backward_elimination)$coefficients %>%
   )
 ```
 
-```{r glmBackElimSum, Details, echo = FALSE, include = TRUE}
+```{r glmBackElimSumDetails, echo = FALSE, include = TRUE}
 cat(
   "     Null Deviance:", summary(backward_elimination)$null.deviance, "on",
   summary(backward_elimination)$df.null, "degrees of freedom\n",
@@ -1272,3 +1257,75 @@ o Recommendations
 :::
 
 # Acknowledgements {.unnumbered}
+
+# Appendix {.unnumbered}
+
+Simple linear regression is a method of modelling the linear relationship between two random variables, say $X = (x_1,...,x_i,...x_n)$ and $Y = (y_1, ..., y_i, ...y_n)$. We represent this relationship as a line where
+
+$$ \hat{Y} = \beta_0 + \beta_1X \\ $$
+
+Or for each observation
+
+$$ \hat{y_i} = \beta_0 + \beta_1x_i $$
+
+Where $\hat{Y} = (\hat{y_1}, ..., \hat{y_n})$ are our predicted $y_i$ values based on the corresponding $x_i$ and $\beta_0$ is the intercept term, and $\beta_1$ is the slope coefficient.
+
+Above we can see a plot where the blue dots are the observations and the red line is our $\hat{Y} = \beta_0+\beta_1X$. Also included are the green lines, which represent the difference between the prediction and the true value, $y_i-\hat{y_i}$. In order to find the best fitting line, we get the sum of the squares of these differences and minimise this value, yielding the Least Squares Estimate (LSE) of our regression parameters $\beta_0$, $\beta_1$:
+
+$$ LSE(\beta) = \min\sum(y_i-\hat{y}_i)^2 $$
+
+Recalling that
+
+$$\hat{y_i} = \beta_0 + \beta_1x_i$$ We can write this as
+
+```{=tex}
+\begin{equation} LSE(\beta) = \min\sum(y_i-(\beta_0+\beta_1x_i))^2 (\#eq:LSE) \end{equation}
+```
+Now we can find, using partial derivatives, the $\beta_0$ and $\beta_1$ that minimise this value.
+
+This can also be extended for Multiple Linear Regression, where we have more than one predictor variable $x$, and instead we use the formula
+
+Where i = 1,...,n.
+
+However, for the time being, it will be assumed there is only one predictor variable $x$ for ease of notation.
+
+A different approach lies in understanding that often we can assume the following:
+
+1.  The observations $y_i$ are independent
+
+2.  The observations are normally distributed with $y_i \sim N(\mu_i, \sigma^2)$
+
+3.  We can estimate these $\mu_i$ with a line of the form $\mu_i = \beta_0 + \beta_1X_i$
+
+Above is a representation of these assumptions, where we still see some linear relationship between X and Y, where the green lines represent the density of each distribution $N(\mu_i, \sigma^2)$. The key aspect here is we are no longer fitting a line to the observations Y, rather to the means of the normal distributions from which they come. We can then evaluate the likelihood of the ith observation being from the ith distribution with the pdf
+
+$$ \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}} $$
+
+To find the joint probability across all observations we get
+
+$$ \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}} $$
+
+But recall that $\mu_i = \beta_0+\beta_1x_i$, and we would like to maximise this probability with respect to the $\beta's$. We can write this as instead a likelihood function
+
+$$ \mathcal{L}(\beta|Y) = \prod^n_{i=1} \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i - \mu_i)^2}{2\sigma^2}} $$
+
+We know that any $\beta$ that maximises this function also maximises the log likelihood function denoted $\ell(\beta|Y)$, which also helps in evaluating the right hand side
+
+$$ \ell(\beta|Y) = \sum^n_{i=1} -\log(\sqrt{2\pi\sigma^2}) - \frac{(y_i - \mu_i)^2}{2\sigma^2} $$
+
+Seeing as we are only interested in terms here that relate to $\beta$ and $y_i$, we can ignore some terms and finally we have
+
+$$ \ell(\beta|Y) = -\sum(y_i-\mu_i)^2 $$
+
+We now want to maximise this value, but as it is a negative quantity, this is the same as minimising the negative of the function, and notate this as our Maximum Likelihood Estimator (MLE)
+
+If we replace $\mu_i$ with our linear model, we get
+
+```{=tex}
+\begin{equation} MLE(\beta) = \min\sum(y_i-(\beta_0 + \beta_1x_i)^2 (\#eq:MLE) \end{equation}
+```
+Note: Once again, this form can be extended for multiple predictor variables $x$, where it takes the form
+
+$$ MLE(\beta) = \min\sum^n_{i=1}(y_i-(\beta_0 + \sum^p_{j=1}\beta_jx_{ij}))^2 $$
+
+In the case of a normally distributed random variable, the MLE \@ref(eq:MLE) is identical to the LSE \@ref(eq:LSE). However, for non-normal variables, we require a different framework which first requires addressing the normal distribution deeper, particularly the family of distributions, the Exponential Distribution Family (EDF).
