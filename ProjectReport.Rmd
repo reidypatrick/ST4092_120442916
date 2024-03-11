@@ -155,14 +155,27 @@ Several Assumptions are adopted in actuarial rating methods, for example in TPL 
 
 This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information. It is also important to note that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for. It is also accounted for as this applies across all risk categories equally.
 
-| Exposure (E)  | Response (Y)  | Ratio (X)       |
-|---------------|---------------|-----------------|
-| Duration      | No. of Claims | Claim Frequency |
-| Duration      | Claim Cost    | Pure Premium    |
-| No. of Claims | Claim Cost    | Claim Severity  |
-| Premium Inc   | Claim Cost    | Loss Ratio      |
+```{r tableRatio, fig.cap="Important Ratios/Metrics for Insurance Pricing", paged.print=TRUE}
+tab_ratio <- rbind(c("Duration", "No. of Claims", "Claim Frequency"),
+  c("Duration", "Claims Cost", "Pure Premium"),
+  c("No. of Claims", "Claims Cost", "Claim Severity"),
+  c("Premium Inc", "Claims Cost", "Loss Ratio")
+  ) %>% 
+  as.data.frame(
+    optional = FALSE,
+    make.names = TRUE,
+  )  
 
-: Important Ratios/Metrics for Insurance Pricing
+colnames(tab_ratio) <- c("Exposure (E)", "Response (Y)", "Ratio (X)")
+
+tab_ratio %>% 
+  kable(format = "latex", booktabs = TRUE,
+    caption = "Important Ratios/Metrics for Insurance Pricing",
+    row.names = FALSE) %>% 
+  kable_styling(latex_options = "HOLD_position") %>%
+  row_spec(row = 1, bold = TRUE, background = "gray")
+
+```
 
 Generally, these ratios are some outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk, and the outcome is the number of claims they make in that period. This ratio of claim frequency will be the focus of this investigation.
 
