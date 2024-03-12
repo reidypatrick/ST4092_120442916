@@ -64,6 +64,8 @@ options(source_or_run = "source")
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
 
+\fontsize{14}{14}
+
 \newpage
 
 # Abstract {.unlisted .unnumbered}
@@ -114,32 +116,17 @@ EDF
 
 # Introduction
 
-Insurance is a transaction where risk is transferred from the policyholder to the insurer, in return for the premium paid by the policyholder.
+Insurance is a transaction where risk is transferred from the policyholder to the insurer, in return for the premium paid by the policyholder. Insurers must calculate this premium and hence this becomes a problem in risk assessment. A policyholder purchases a policy to cover them for a period of time, so that in the event of unpredictable losses and damages, they are covered financially. If not insured, damages would be significant to be reimburse for the individual. In order to determine the necessary premium charged by the insurer, the risk posed by the policyholder must be evaluated.
 
-Insurance pricing is a problem in risk assessment. A policyholder purchases a policy to cover them for a period of time, so that in the event of unpredictable losses and damages, they are covered financially. In order to evaluate the necessary premium charged by the insurer, the risk posed by the policyholder must be evaluated.
+Insurers aim to balance the loss ratio i.e. the maount of loss from claims to be paid out versus the total premium income from all policyholders.
 
-The insurance premium is usually derived from an annual frequency of claims , which is modelled using statistical data. The annual frequency of claims is calculated from the number of claims on a contract. Thus consideration of factors that influence loss frequency, the risk-taking and risk-reducing behaviour of individuals and companies is crucial. Explanatory (rating) variables can have different effects on models of how often an event occurs.\
-\
-Explanatory variables include age, vehicle type. Prior claims history is also important as a risk classification factor.
+The insurance premium is usually derived from an annual frequency of claims , which is modelled using statistical data. The annual frequency of claims is calculated from the number of claims on a contract. Thus consideration of factors that influence loss frequency, the risk-taking and risk-reducing behaviour of individuals and companies is crucial. Explanatory (rating) variables can have different effects on models of how often an event occurs. Explanatory variables include age, vehicle type. Prior claims history is also important as a risk classification factor. Not all policyholders have the same probability to claim, therefore it is important that both premiums are determined carefully and policyholders chosen wisely.
 
-Statistical models are used to determine this risk in particular by means of regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
+In this study we concentrate on statistical models used to determine this risk in particular by means of regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
 
 The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, as the capacity of statistical models have advanced from classical regression methods to more sophisticated models such as Generalised Linear Models (GLMs) and, most recently, Deep Learning (DL) models. Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry.
 
-Third Party Liability (TPL) insurance is that which protects the first party (the policyholder) from legal liability to a third party. This will cover the policyholder in the event that they are at fault for any damages and losses owed to the third party, which here is the other driver in the accident. In this paper we will discuss a particular dataset of French Motor TPL claims, which is further discussed in Section \@ref(data-collection).
-
-Regression modelling refers to the process of fitting explanatory variables to a numerical value.
-
-Classical linear regression is the earliest and simplest form of modelling and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
-
-Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multilayered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised. *TODO: expand!*
-
-The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance *TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
-
-1.  *Insurance companies seek to find the best model for estimation of insurance premiums*
-2.  *The level of premium is governed by many risk factors. For example profile of car, driver*
-3.  *Insurance risk selection refers to process by which insurers decide whether to insure an individual and the premium to charge*
-4.  *Car insurance is an insurance designed to offer financial protection... Insurance premiums are usually derived from statistical modelling of annual frequencies of claims.*
+Third Party Liability (TPL) insurance is that which protects the first party (the policyholder) from legal liability to a third party. It is the minimum level of cover offered in car insurance and required by law in most countries. This will cover the policyholder in the event that they are at fault for any damages and losses owed to the third party, which here is the other driver in the accident. In this paper we will be using a particular dataset of French Motor TPL claims, which is further discussed in Section \@ref(data-collection).
 
 Several Assumptions are adopted in actuarial rating methods, for example in TPL insurance
 
@@ -159,7 +146,7 @@ This assumption of homogeneity is perhaps the most violated, as although policyh
 tab_ratio <- rbind(c("Duration", "No. of Claims", "Claim Frequency"),
   c("Duration", "Claims Cost", "Pure Premium"),
   c("No. of Claims", "Claims Cost", "Claim Severity"),
-  c("Premium Inc", "Claims Cost", "Loss Ratio")
+  c("Premium Income", "Claims Cost", "Loss Ratio")
   ) %>% 
   as.data.frame(
     optional = FALSE,
@@ -173,17 +160,36 @@ tab_ratio %>%
     caption = "Important Ratios/Metrics for Insurance Pricing",
     row.names = FALSE) %>% 
   kable_styling(latex_options = "HOLD_position") %>%
-  row_spec(row = 1, bold = TRUE, background = "gray")
+  kable_styling(latex_options = "striped") %>%
+  row_spec(row = 1, bold = TRUE)
 
 ```
 
 Generally, these ratios are some outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk, and the outcome is the number of claims they make in that period. This ratio of claim frequency will be the focus of this investigation.
+
+Classical linear regression is the earliest and simplest form of modelling and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
+
+Deep Learning models have recently taken industries across the world by storm, not least the insurance industry, ushering in a new era of predictive accuracy. Neural networks, with their multi-layered architecture, can capture intricate patterns in massive datasets, including high-dimensional data, unstructured data, and temporal data. DL models have demonstrated remarkable capabilities in feature extraction, non-linear relationship modelling, and predictive accuracy. They are capable of handling diverse data types such as images, text, and tabular data, which is particularly valuable in the age of big data. These advantages extend to the world of insurance pricing, where their potential remains yet to be completely realised. *TODO: expand!*
+
+The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance *TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
 # Background
 
 The process of modelling involves first the collection of data, the subdivision of the data into risk groups using explanatory variables, and finally fitting these explanatory variables to the number of claims and interpreting the results.
 
 For example, in car insurance, the profile of the driver and of the car are used as explanatory variables.
+
+As part of the risk profile of the driver, it is understandably crucial to use their prior history of claims to determine their risk. Insurers use a Bonus-Malus System (BMS) to represent this history. This is often presented to policyholders as some "No-Claims Bonus", where displaying
+
+From @service-public
+
+> "The bonus-malus takes as a reference the period of 12 consecutive months preceding by 2 months the annual expiry of the contract.
+>
+> > Example :
+> >
+> > For a contract with an annual maturity of 31 December 2020, the reference period shall be 1^er^ November 2019 to October 31, 2020.
+>
+> The insurer is obliged to apply the bonus-malus rule. However, the reference premium is determined by the insurer, and each insurer has its own reference premiums. You must therefore check the applicable reference premium in the contract."
 
 Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. This risk is evaluated using statistical models that use factors related to the risk. For example, in the context of car insurance, the profiles of both the driver and the car impact how risk is considered and priced.
 
