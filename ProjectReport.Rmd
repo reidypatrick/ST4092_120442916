@@ -143,22 +143,25 @@ Several Assumptions are adopted in actuarial rating methods, for example in TPL 
 This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information. It is also important to note that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for. It is also accounted for as this applies across all risk categories equally.
 
 ```{r tableRatio, fig.cap="Important Ratios/Metrics for Insurance Pricing", paged.print=TRUE}
-tab_ratio <- rbind(c("Duration", "No. of Claims", "Claim Frequency"),
+tab_ratio <- rbind(
+  c("Duration", "No. of Claims", "Claim Frequency"),
   c("Duration", "Claims Cost", "Pure Premium"),
   c("No. of Claims", "Claims Cost", "Claim Severity"),
   c("Premium Income", "Claims Cost", "Loss Ratio")
-  ) %>% 
+) %>%
   as.data.frame(
     optional = FALSE,
     make.names = TRUE,
-  )  
+  )
 
 colnames(tab_ratio) <- c("Exposure (E)", "Response (Y)", "Ratio (X)")
 
-tab_ratio %>% 
-  kable(format = "latex", booktabs = TRUE,
+tab_ratio %>%
+  kable(
+    format = "latex", booktabs = TRUE,
     caption = "Important Ratios/Metrics for Insurance Pricing",
-    row.names = FALSE) %>% 
+    row.names = FALSE
+  ) %>%
   kable_styling(latex_options = "HOLD_position") %>%
   kable_styling(latex_options = "striped") %>%
   row_spec(row = 1, bold = TRUE)
