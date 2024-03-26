@@ -9,6 +9,8 @@ affiliation: "School of Mathematical Sciences, University College Cork"
 
 email: "120442916@umail.ucc.ie"
 
+fontsize: 12pt
+
 output: 
   bookdown::pdf_document2:
     fig_crop: no
@@ -63,8 +65,6 @@ options(source_or_run = "source")
 
 cars_orig <- OpenML::getOMLDataSet(data.id = 41214)$data
 ```
-
-\fontsize{14}{14}
 
 \newpage
 
@@ -176,35 +176,55 @@ Deep Learning models have recently taken industries across the world by storm, n
 
 The transition from GLMs to Deep Learning is not without its challenges. While DL models excel in predictive performance, they often sacrifice interpretability, which is a crucial requirement in the insurance industry for regulatory compliance and trustworthiness. Additionally, the capabilities of unsupervised learning has been at times overestimated, with many foregoing vital data preprocessing and investigation in the excitement of early demonstrations of these models' performance *TODO: expand!*. Ensuring model fairness *??, expand* and avoiding bias in DL models remains an active area of research, as it is crucial for ethical underwriting and legal compliance. One method to address these concerns is to improve the explainability of these models, or bridge the gap in performance between traditional GLMs and DL models.
 
+\newpage
+
 # Background
+
+## Risk Classification
 
 The process of modelling involves first the collection of data, the subdivision of the data into risk groups using explanatory variables, and finally fitting these explanatory variables to the number of claims and interpreting the results.
 
-For example, in car insurance, the profile of the driver and of the car are used as explanatory variables.
+Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. In car insurance statistical models are developed using factors related to the risk. We can distinguish two main approaches
 
-As part of the risk profile of the driver, it is understandably crucial to use their prior history of claims to determine their risk. Insurers use a Bonus-Malus System (BMS) to represent this history. This is often presented to policyholders as some "No-Claims Bonus", where displaying
+1.  One where individual characteristics are treated as random variables
+2.  The other tries to explain variation by observable differences among the insurance profiles/risk groups
 
-From @service-public
+Insurance modelling seeks to combine both views.
+
+-   Individual characteristics are variables that describe the policyholder, e.g. age.
+
+-   Vehicle characteristics are variables that describe the car e.g. engine size, brand.
+
+-   Geographical characteristics are variables that describe the environment of the policyholder, e.g. density.
+
+These variables can be either categorical or continuous. However, in using the data to delineate risk *groups*, it can be more helpful when these variables are categorical, and we may endeavour to transform continuous variables into categorical variables through banding for this reason.
+
+Furthermore, certain variables can represent unobservable characteristics. For instance, claim history could be used as a proxy for the evaluation of the quality/skill of the driver. This can be hard to capture statistically, as driving skill would itself have a random effect on the frequency of claims. There are a number of methods, often proprietary and unique to each insurer, to capture this effect. These are referred to as Bonus-Malus Systems.
+
+### Bonus-Malus System
+
+As part of the risk profile of the driver, it is understandably crucial to use their prior history of claims to determine their risk. Insurers use a Bonus-Malus System (BMS) to represent this history. This is often presented to policyholders as some "No-Claims Bonus", where drivers are rewarded with a discounted premium compared to those who make many claims. The dataset used in this investigation is French. In France, it is required by law @service-public that insurers use a Bonus-Malus System, though the particular method that it is applied is up to each insurer.
 
 > "The bonus-malus takes as a reference the period of 12 consecutive months preceding by 2 months the annual expiry of the contract.
 >
 > > Example :
 > >
-> > For a contract with an annual maturity of 31 December 2020, the reference period shall be 1^er^ November 2019 to October 31, 2020.
+> > For a contract with an annual maturity of 31 December 2020, the reference period shall be 1^st^ November 2019 to October 31, 2020.
 >
 > The insurer is obliged to apply the bonus-malus rule. However, the reference premium is determined by the insurer, and each insurer has its own reference premiums. You must therefore check the applicable reference premium in the contract."
 
-Insurance pricing is the task of calculating the optimal price offered by an insurance provider to a potential policyholder. In order to determine the price, it is necessary to determine first the risk posed by the person to be insured. This risk is evaluated using statistical models that use factors related to the risk. For example, in the context of car insurance, the profiles of both the driver and the car impact how risk is considered and priced.
+### Exposure
 
-To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression. We will use this a foundation on which to build and also address the limitations especially in the context of car insurance claims, where in practice heteroskedasticity occurs as we are not dealing with a normal distribution, but rather a Poisson distribution.
+
+## Regression Modelling
+
+~~To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression.~~ We will use this a foundation on which to build and also address the limitations especially in the context of car insurance claims, where in practice heteroskedasticity occurs as we are not dealing with a normal distribution, but rather a Poisson distribution.
 
 Regression modelling assumes a normal distribution, which in turn requires a symmetric density and homoskedastic variance. We will see in Section \@ref(GeneralisedLinearModels) and more demonstrably through the data in Section \@ref(DataAnalysis) how these assumptions do not fit our use case. Our data of claim numbers will be count data, meaning they are bounded by zero, discrete and heteroskedastic. These elements suggest that a Poisson distribution will be more appropriate. We will therefore introduce an expanded family of distributions, known as the Exponential Distribution Family, in Section \@ref(ExponentialDistributionFamily)
 
 We will therefore introduce the Exponential Distribution Family, a more general family of distributions of which the Normal and Poisson are members, to see how this model can be expanded to a more versatile family of models called Generalised Linear Models. This will yield a great deal of information as to the risk associated with an insurance profile. Furthermore, these models will then be again extended and generalised to produce an even more powerful modelling architecture: Neural Networks.
 
-Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
-
-## Regression Modelling {#regressionModelling}
+## Classical Linear Regression {#regressionModelling}
 
 ```{r figLMMLE, fig.cap = "Linear Model: MLE", out.height="50%"}
 # Set seed for reproducibility
@@ -257,6 +277,14 @@ legend(
 )
 ```
 
+\@ref(fig:figLMMLE) visualises the process of simple linear regression
+
+-   The blue dots are our observations, where the y-axis represents the target variable and the x-axis is the predictor variable
+
+-   The green lines are the density function of normal distributions
+
+-   The red line is our predicted values, which is a straight line through the mean of each normal distribution from which each observation comes.
+
 ### Assumptions
 
 Simple Linear Regression works with the following assumptions:
@@ -264,7 +292,7 @@ Simple Linear Regression works with the following assumptions:
 -   The predictor variables $X_1, ... X_p$ are independent
 -   The observations $y_i$ are identically independent distributed where $y_i \sim N(\mu_i, \sigma^2)$
 -   This $\mu_i$ can be estimated in the form $\mu_i = \beta_0 + \sum^p_{j=1}\beta_jX_{ij}$
--   There $y_is$ have constant variance $\sigma^2$ across all levels, i.e. homeskedasticity
+-   The $y_is$ have constant variance $\sigma^2$ across all levels, i.e. homeskedasticity
 
 ### Estimation
 
@@ -389,7 +417,7 @@ legend(
 )
 ```
 
-Here we see that our $y_is$ are clearly not distributed normally, rather by some other distribution $f(y_i)$ illustrated by the green densities, and as such any linear predictor, such as is shown in red, will not accurately model our data.
+Here we see that our $y_is$ are clearly not distributed normally, as the green lines representing the density are skewed, asymmetric, and the variance is not constant across all levels, i.e. the data are heteroskedastic. This means our observations are not distributed normally, rather by some other distribution $f(y_i)$ illustrated by the green densities, and as such any linear predictor, such as is shown in red, will not accurately model our data.
 
 For the purpose of this report, we will be looking at insurance claim as a count, which is known to follow a Poisson distribution, the density of which can be seen below.
 
@@ -474,6 +502,8 @@ MLE(\beta|Y) = \sum^n_{i=1} y_ilog(\mu_i) -\mu_i + log(y_i!)
 $$
 
 # Neural Networks
+
+Neural Networks often trade off the ease with which GLMs are interpreted for greater predictive accuracy, i.e. calculating the risk more precisely, but yielding little information as to what factors specifically contribute to this risk. It will be discussed that through careful consideration of our NN architecture, one can indeed extract valuable information regarding the relationship between factors and risk.
 
 ## Background
 
