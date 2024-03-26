@@ -231,7 +231,15 @@ Where:
  - $x_p$ are our explanatory variables, for TPL these would be the characteristics relating the individual, vehicle, geography etc.
  - $\beta_p$ are our regression coefficients, that capture the effect each explanatory variable has on the expected number of claims.
  
-If we have a large volume of data, that is a large amount of y's and X's, we can 
+If we have a large volume of data, that is a large amount of y's and X's, we can determine the model with the most accuracy by using the Maximum Likelihood Estimator (MLE), to find the regression coefficients with the highest likelihood of explaining our data.
+
+$$
+MLE(\beta) = 
+$$
+
+
+
+
 ~~To understand these models, we will first begin with the simplest form of modelling, namely simple linear regression.~~ We will use this a foundation on which to build and also address the limitations especially in the context of car insurance claims, where in practice heteroskedasticity occurs as we are not dealing with a normal distribution, but rather a Poisson distribution.
 
 Regression modelling assumes a normal distribution, which in turn requires a symmetric density and homoskedastic variance. We will see in Section \@ref(GeneralisedLinearModels) and more demonstrably through the data in Section \@ref(DataAnalysis) how these assumptions do not fit our use case. Our data of claim numbers will be count data, meaning they are bounded by zero, discrete and heteroskedastic. These elements suggest that a Poisson distribution will be more appropriate. We will therefore introduce an expanded family of distributions, known as the Exponential Distribution Family, in Section \@ref(ExponentialDistributionFamily)
