@@ -120,27 +120,9 @@ Insurance is a transaction where risk is transferred from the policyholder to th
 
 Insurers aim to balance the loss ratio i.e. the maount of loss from claims to be paid out versus the total premium income from all policyholders.
 
-The insurance premium is usually derived from an annual frequency of claims , which is modelled using statistical data. The annual frequency of claims is calculated from the number of claims on a contract. Thus consideration of factors that influence loss frequency, the risk-taking and risk-reducing behaviour of individuals and companies is crucial. Explanatory (rating) variables can have different effects on models of how often an event occurs. Explanatory variables include age, vehicle type. Prior claims history is also important as a risk classification factor. Not all policyholders have the same probability to claim, therefore it is important that both premiums are determined carefully and policyholders chosen wisely.
+The focus of this study is Third Party Liability (TPL). TPL insurance is that which protects the first party (the policyholder) from legal liability to a third party. It is the minimum level of cover offered in car insurance and required by law in most countries. This will cover the policyholder in the event that they are at fault for any damages and losses owed to the third party, which here is the other driver in the accident.
 
-In this study we concentrate on statistical models used to determine this risk in particular by means of regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
-
-The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, as the capacity of statistical models have advanced from classical regression methods to more sophisticated models such as Generalised Linear Models (GLMs) and, most recently, Deep Learning (DL) models. Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry.
-
-Third Party Liability (TPL) insurance is that which protects the first party (the policyholder) from legal liability to a third party. It is the minimum level of cover offered in car insurance and required by law in most countries. This will cover the policyholder in the event that they are at fault for any damages and losses owed to the third party, which here is the other driver in the accident. In this paper we will be using a particular dataset of French Motor TPL claims, which is further discussed in Section \@ref(data-collection).
-
-Several Assumptions are adopted in actuarial rating methods, for example in TPL insurance
-
--   All individual claims are independent meaning
-
-    -   Independence of policies
-
-    -   Time Independence *Expand*
-
--   Homogeneity
-
-    -   While the data as a *whole* might not be homogeneous, we assume the response from policies in the *same risk category* are, and given they have the same exposure, we then assume that they are from the same probability distribution
-
-This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information. It is also important to note that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for. It is also accounted for as this applies across all risk categories equally.
+When making models for TPL insurance, several ratios are calculated to determine the risk of the policyholder. Generally, these ratios are some outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk, and the outcome is the number of claims they make in that period. This ratio of claim frequency will be the focus of this investigation. \@ref(fig:tableRatio) shows some important ratios considered in modelling TPL risk.
 
 ```{r tableRatio, fig.cap="Important Ratios/Metrics for Insurance Pricing", paged.print=TRUE}
 tab_ratio <- rbind(
@@ -168,7 +150,29 @@ tab_ratio %>%
 
 ```
 
-Generally, these ratios are some outcome divided by the value that measures exposure. For example for claim frequency the exposure is the amount of time that the policyholder is covered for risk, and the outcome is the number of claims they make in that period. This ratio of claim frequency will be the focus of this investigation.
+The insurance premium is usually derived from an annual frequency of claims , which is modelled using statistical data. The annual frequency of claims is calculated from the number of claims on a contract. Thus consideration of factors that influence loss frequency, the risk-taking and risk-reducing behaviour of individuals and companies is crucial. Explanatory (rating) variables can have different effects on models of how often an event occurs. Explanatory variables include age, vehicle type. Prior claims history is also important as a risk classification factor. It follows that not all policyholders will have the same probability to claim, therefore it is important that both premiums are determined carefully and policyholders chosen wisely.
+
+In this study we concentrate on statistical models used to determine this risk in particular by means of regression modelling. An aspect of the risk we will consider is the number of claims made by a policyholder over the period of cover.
+
+The approach to insurance pricing has witnessed a significant evolution in modelling techniques over the years, as the capacity of statistical models have advanced from classical regression methods to more sophisticated models such as Generalised Linear Models (GLMs) and, most recently, Deep Learning (DL) models. Insurance providers are constantly searching for ways to improve and gauge the performance of these models. We will discuss several of these models, see how they are related and discuss ongoing developments in the insurance pricing industry. In this study we will be using a particular dataset of French Motor TPL claims, which is further discussed in Section \@ref(data-collection).
+
+Several Assumptions are adopted in actuarial rating methods, for example in TPL insurance
+
+-   All individual claims are independent meaning
+
+    -   Independence of policies
+
+        -   While it could be possible, that two drivers covered by the same insurer are involved in the same accident and both make claims, which would make these observations not independent, we consider this to be unlikely and rare, such that the effect would be insignificant and unnecessary to account for in modelling.
+
+    -   Time Independence
+
+        -   It can be argued that seasonal factors can be very influential (e.g. adverse weather conditions can contribute to more accidents and therefore more claims). We assume that if each policy has an exposure of one year, that this seasonality is accounted for and equal across all policies.
+
+-   Homogeneity
+
+    -   While the data as a *whole* might not be homogeneous, we assume the response from policies in the *same risk category* are, and given they have the same exposure, we then assume that they are from the same probability distribution
+
+This assumption of homogeneity is perhaps the most violated, as although policyholders are divided into categories according to risk profiles, not all the variation can be explained by the available information It is also accounted for as this applies across all risk categories equally.
 
 Classical linear regression is the earliest and simplest form of modelling and has been used in a variety of predictive applications due to its ease of interpretation and implementation, it is not however appropriate in the context of insurance pricing as it is not designed to handle the complexities of higher-order applications, such as the representation of non-linear relationships. This is particularly problematic in the context of insurance data, where the outcome is heavily influenced by complex interactions between multiple fields and attributes. Consequently, Generalized Linear Models have emerged since as a significant advancement, offering a more flexible framework that accommodated various distribution families and data types. GLMs excel in modelling discrete and continuous outcomes while retaining interpretability, making them the go-to choice for many years.
 
@@ -214,7 +218,6 @@ As part of the risk profile of the driver, it is understandably crucial to use t
 > The insurer is obliged to apply the bonus-malus rule. However, the reference premium is determined by the insurer, and each insurer has its own reference premiums. You must therefore check the applicable reference premium in the contract."
 
 ### Exposure
-
 
 ## Regression Modelling
 
