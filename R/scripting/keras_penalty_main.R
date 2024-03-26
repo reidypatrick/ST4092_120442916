@@ -62,7 +62,6 @@ predictions_penalty <- predict(best_fit_penalty, new_data = test_data) %>%
 val_data_penalty <- test_data %>%
   mutate(index = seq_len(nrow(test_data))) %>%
   right_join(predictions_dropout, join_by(index))
-
 ## Calculate Metrics -----------------------------------------------------------
 yardstick::metrics(data = val_data_penalty, truth = ClaimNb, estimate = .pred)
 
